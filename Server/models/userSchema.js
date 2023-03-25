@@ -1,6 +1,9 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const config = require("../config/index");
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import config from "../config/index.js";
+import cookieOptions from "../utils/cookieOptions.js";
+import JWT from "jsonwebtoken";
+
 const { Schema } = mongoose;
 
 const userSchema = new Schema(
@@ -19,6 +22,7 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
+      select: false,
     },
     role: {
       type: Number,
@@ -54,5 +58,18 @@ userSchema.methods = {
   comparePassword: async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
   },
+  getJWTtoken: function () {
+    return JWT.sign(
+      {
+        id: this._id,
+        role: this.role,
+        email: this.email,
+      },
+      config.SECRET,
+      {
+        expiresIn: config.EXPIRY,
+      }
+    );
+  },
 };
-module.exports = mongoose.model("User", userSchema);
+export default mongoose.model("User", userSchema);

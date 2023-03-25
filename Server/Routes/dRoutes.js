@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const { createDefect } = require("../Controllers/dController");
+import { createDefect } from "../Controllers/dController.js";
 
 router.post("/created", createDefect);
-module.exports = router;
+export default router;

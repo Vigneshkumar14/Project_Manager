@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const Defect = require("../models/defectSchema");
+import mongoose from "mongoose";
+import Defect from "../models/defectSchema.js";
 
 const createDefect = async (req, res) => {
   try {
@@ -46,4 +46,4 @@ const createDefect = async (req, res) => {
   }
 };
 
-module.exports = { createDefect };
+export { createDefect };

@@ -1,16 +1,18 @@
-const express = require("express");
+import config from "./config/index.js";
+import express from "express";
 const app = express();
-const PORT = process.env.PORT;
-const { connectToDB } = require("./config/database");
-const userRoutes = require("./Routes/userRoutes");
-const dRoutes = require("./Routes/dRoutes");
-const config = require("./config/index");
+import cookieParser from "cookie-parser";
+import { connectToDB } from "./config/database.js";
+import userRoutes from "./Routes/userRoutes.js";
+import dRoutes from "./Routes/dRoutes.js";
 
 // DB Connection
 connectToDB();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Cookie Parser to get cookies in req.cookie
+app.use(cookieParser());
 
 // User Routes
 app.use("/api", userRoutes);
@@ -18,6 +20,6 @@ app.use("/api", userRoutes);
 // Defect Routes
 app.use("/api", dRoutes);
 
-app.listen(PORT, () => {
+app.listen(config.PORT, () => {
   console.log(`Server is listeining to PORT ${config.PORT}`);
 });

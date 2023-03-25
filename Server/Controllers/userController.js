@@ -1,137 +1,149 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const User = require("../models/userSchema");
-const saltRounds = process.env.SALTROUNDS;
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import User from "../models/userSchema.js";
+import asyncHandler from "../services/asyncHandler.js";
+import CustomError from "../utils/customError.js";
+import cookieOptions from "../utils/cookieOptions.js";
 
-const createUser = async (req, res) => {
+/******************************************************
+ * @SIGNUP
+ * @REQUEST_TYPE POST
+ * @route http://localhost:8000/api/create
+ * @description User signUp Controller for creating new user
+ * @parameters name, email, role
+ * @returns User Object
+ ******************************************************/
+
+const createUser = asyncHandler(async (req, res) => {
   const { email, password, role } = req.body;
 
   //   Check if email and password is blank
   if (!email || !password) {
-    return res.status(401).json({
-      success: true,
-      message: "Email or Password should not br blank",
-    });
+    throw new CustomError("Email or Password should not br blank", 400);
   }
 
   // Check if user already exist in database
 
   let checkUser = await User.findOne({ email });
-  if (checkUser)
-    return res
-      .status(401)
-      .json({ success: false, message: "Email already exits" });
+  if (checkUser) throw new CustomError("Email already exits", 401);
 
   // Hasing the password to store in database
+  // Creating the new user
+  const user = await User.create({
+    email: email,
+    password: password,
+    role: role,
+  });
 
-  const enp = bcrypt.genSalt(Number(saltRounds), (err, salt) => {
-    bcrypt.hash(password, salt, async (err, hash) => {
-      // Creating the new user
+  // If user is created then sending cookie as response to the browser
+  const token = user.getJWTtoken();
+  res.cookie("token", token, cookieOptions);
+  user.password = undefined;
+  user.role = undefined;
 
-      const user = await User.create({
-        email: email,
-        password: hash,
-        role: role,
-      });
+  return res.status(201).json({
+    success: true,
+    token,
+    user,
+  });
+});
 
-      user.password = undefined;
-      user.role = undefined;
+/******************************************************
+ * @LOGIN
+ * @REQUEST_TYPE POST
+ * @route http://localhost:8000/api/login
+ * @description User login Controller for creating logging in as a user
+ * @parameters email, password
+ * @returns User Object
+ ******************************************************/
 
-      return res.status(201).json({
-        success: true,
-        user,
-      });
-    });
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password)
+    throw new CustomError("Please enter the email & password", 401);
+
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) throw new CustomError("User doen't exist", 401);
+
+  const matchPassword = await user.comparePassword(password);
+
+  if (!matchPassword)
+    throw new CustomError(
+      "User Email or Password is worng, Please try again",
+      401
+    );
+
+  const token = await user.getJWTtoken();
+
+  res.status(201).cookie("token", token, cookieOptions);
+
+  user.password = undefined;
+  user.role = undefined;
+  console.log(req.cookie);
+
+  return res.status(201).json({
+    success: true,
+    message: "User authenticated",
+    user,
+    token,
+  });
+});
+
+/******************************************************
+ * @CHANGEPASSWORD
+ * @REQUEST_TYPE POST
+ * @route http://localhost:8000/api/changepassword/:user_Id
+ * @description User signUp Controller for creating new user
+ * @parameters email, oldPassword, newPassword
+ * @returns User Object
+ ******************************************************/
+
+const changePassword = asyncHandler(async (req, res) => {
+  const { email, oldPassword, newPassword } = req.body;
+  const { userId } = req.params;
+  if (!email || !oldPassword || !newPassword)
+    throw new CustomError("Please enter Email, Password & New Password", 401);
+
+  if (oldPassword == newPassword)
+    throw new CustomError(
+      "Your old password and new password cannot be same",
+      401
+    );
+
+  const user = await User.findOne({ _id: userId }).select("+password");
+  const matchPassword = await user.comparePassword(oldPassword);
+  if (!matchPassword)
+    throw new CustomError(
+      "Your Current password doesn't match, Kindly try again",
+      401
+    );
+
+  user.password = newPassword;
+  await user.save();
+
+  user.password = undefined;
+  user.role = undefined;
+
+  return res.status(201).json({
+    success: true,
+    message: "Password changed successfully",
+    user,
+  });
+});
+
+/******************************************************
+ * @LOGOUT
+ * @REQUEST_TYPE GET
+ * @route http://localhost:8000/api/logout
+ * @description User logout Controller for remove the cookies from the browser
+ * @parameters NA
+ * @returns NA
+ ******************************************************/
+const logout = (req, res) => {
+  return res.clearCookie("token").status(201).json({
+    sucess: true,
+    message: "Logged out successfully",
   });
 };
 
-const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(401).json({
-        success: false,
-        message: "Please enter the email & password",
-      });
-    }
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "User doen't exist",
-      });
-    }
-    const matchPassword = await bcrypt.compare(password, user.password);
-    if (!matchPassword) {
-      return res.status(401).json({
-        success: false,
-        message: "User Email or Password is worng, Please try again",
-      });
-    }
-
-    user.password = undefined;
-    user.role = undefined;
-
-    return res.status(201).json({
-      success: true,
-      message: "User authenticated",
-      user,
-    });
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-const changePassword = async (req, res) => {
-  try {
-    const { email, oldPassword, newPassword } = req.body;
-    const { userId } = req.params;
-    if (!email || !oldPassword || !newPassword) {
-      return res.status(401).json({
-        success: false,
-        message: "Please enter Email, Password & New Password",
-      });
-    }
-
-    if (oldPassword == newPassword) {
-      return res.status(401).json({
-        success: false,
-        message: "Your old password and new password cannot be same",
-      });
-    }
-    const user = await User.findOne({ _id: userId });
-    const matchPassword = await bcrypt.compare(oldPassword, user.password);
-    if (!matchPassword) {
-      return res.status(401).json({
-        success: false,
-        message: "Your Current password doesn't match, Kindly try again",
-      });
-    }
-
-    bcrypt.genSalt(Number(saltRounds), (err, salt) => {
-      bcrypt.hash(newPassword, salt, async (err, hash) => {
-        // Creating the new user
-
-        const updateUser = await User.findOneAndUpdate(
-          { email },
-          {
-            password: hash,
-          }
-        );
-
-        user.password = undefined;
-        user.role = undefined;
-
-        return res.status(201).json({
-          success: true,
-          message: "Password changed successfully",
-          user,
-        });
-      });
-    });
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-module.exports = { createUser, loginUser, changePassword };
+export { createUser, loginUser, changePassword, logout };

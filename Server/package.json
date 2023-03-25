@@ -1,6 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "type": "module",
   "description": "Project Management Application",
   "main": "app.js",
   "scripts": {
@@ -13,8 +14,10 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.35.0",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.0"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
 const project = new Schema({});
 
-module.exports = mongoose.model("Project", project);
+export default mongoose.model("Project", project);

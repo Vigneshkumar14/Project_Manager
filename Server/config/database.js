@@ -1,9 +1,9 @@
-const mongoose = require("mongoose");
-const MONGODBURL = process.env.MONGODBURL;
+import mongoose from "mongoose";
+import config from "../config/index.js";
 
-exports.connectToDB = () => {
+export const connectToDB = () => {
   mongoose
-    .connect(MONGODBURL, {
+    .connect(config.MONGODBURL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
@@ -13,3 +13,5 @@ exports.connectToDB = () => {
       process.exit(1);
     });
 };
+
+// export { connectToDB };

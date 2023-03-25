@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
@@ -36,7 +36,7 @@ const defect = new Schema(
           type: Schema.Types.ObjectId,
           ref: "User",
         },
-        uploadedOn: date,
+        uploadedOn: Date,
       },
     ],
 
@@ -92,4 +92,4 @@ const defect = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Defect", defect);
+export default mongoose.model("Defect", defect);
