@@ -1,10 +1,11 @@
 import config from "./config/index.js";
 import express from "express";
-const app = express();
 import cookieParser from "cookie-parser";
 import { connectToDB } from "./config/database.js";
 import userRoutes from "./Routes/userRoutes.js";
 import dRoutes from "./Routes/dRoutes.js";
+
+const app = express();
 
 // DB Connection
 connectToDB();

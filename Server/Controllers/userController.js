@@ -38,6 +38,7 @@ const createUser = asyncHandler(async (req, res) => {
   // If user is created then sending cookie as response to the browser
   const token = user.getJWTtoken();
   res.cookie("token", token, cookieOptions);
+
   user.password = undefined;
   user.role = undefined;
 
@@ -59,11 +60,16 @@ const createUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+
+  // Checking if the email and password values are coming from user
   if (!email || !password)
     throw new CustomError("Please enter the email & password", 401);
 
+  // Trying to find the email in the Database
   const user = await User.findOne({ email }).select("+password");
   if (!user) throw new CustomError("User doen't exist", 401);
+
+  // Comparig the Passwords
 
   const matchPassword = await user.comparePassword(password);
 
@@ -73,14 +79,14 @@ const loginUser = asyncHandler(async (req, res) => {
       401
     );
 
+  // If password is matched generating the token
+
   const token = await user.getJWTtoken();
 
   res.status(201).cookie("token", token, cookieOptions);
 
   user.password = undefined;
   user.role = undefined;
-  console.log(req.cookie);
-
   return res.status(201).json({
     success: true,
     message: "User authenticated",
@@ -140,6 +146,7 @@ const changePassword = asyncHandler(async (req, res) => {
  * @returns NA
  ******************************************************/
 const logout = (req, res) => {
+  // Clearing the cookies in browser
   return res.clearCookie("token").status(201).json({
     sucess: true,
     message: "Logged out successfully",
