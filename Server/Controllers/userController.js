@@ -4,6 +4,7 @@ import User from "../models/userSchema.js";
 import asyncHandler from "../services/asyncHandler.js";
 import CustomError from "../utils/customError.js";
 import cookieOptions from "../utils/cookieOptions.js";
+import sendEmails from "../utils/mailHelper.js";
 
 /******************************************************
  * @SIGNUP
@@ -15,10 +16,10 @@ import cookieOptions from "../utils/cookieOptions.js";
  ******************************************************/
 
 const createUser = asyncHandler(async (req, res) => {
-  const { email, password, role } = req.body;
+  const { name, email, password, role } = req.body;
 
   //   Check if email and password is blank
-  if (!email || !password) {
+  if (!email || !password || !name) {
     throw new CustomError("Email or Password should not br blank", 400);
   }
 
@@ -30,6 +31,7 @@ const createUser = asyncHandler(async (req, res) => {
   // Hasing the password to store in database
   // Creating the new user
   const user = await User.create({
+    name: name,
     email: email,
     password: password,
     role: role,
@@ -41,6 +43,7 @@ const createUser = asyncHandler(async (req, res) => {
 
   user.password = undefined;
   user.role = undefined;
+  user.name = undefined;
 
   return res.status(201).json({
     success: true,
@@ -145,7 +148,7 @@ const changePassword = asyncHandler(async (req, res) => {
  * @parameters NA
  * @returns NA
  ******************************************************/
-const logout = (req, res) => {
+const logout = (_req, res) => {
   // Clearing the cookies in browser
   return res.clearCookie("token").status(201).json({
     sucess: true,
@@ -153,4 +156,53 @@ const logout = (req, res) => {
   });
 };
 
-export { createUser, loginUser, changePassword, logout };
+/******************************************************
+ * @FORGOTPASSWORD
+ * @REQUEST_TYPE POST
+ * @route http://localhost:8000/api/forgotpassword
+ * @description User forgot passwword Controller to resset the password with OTP validation
+ * @parameters email
+ * @returns Success message
+ ******************************************************/
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) throw new CustomError("Please enter the email to continue", 402);
+
+  const user = await User.findOne({ email }).select("+name");
+
+  if (!user) throw new CustomError("User not found", 401);
+
+  try {
+    const otp = await user.getOtp();
+    await user.save({ validateBeforeSave: false });
+    const options = {
+      toEmail: user.email,
+      subject: "Forgot Password request",
+      text: `Hello ${user.name},\n Your OTP is ${otp}\nPlease enter this OTP to process your forgot password request.\n If this is not triggered by you don't share this otp with any one thanks.`,
+      username: user.name,
+      otp: otp,
+    };
+    console.log(options);
+    // // Parameters required (toEmail, subject,text,username,otp)
+    const emailStatus = await sendEmails(options);
+
+    if (!emailStatus.success)
+      throw new CustomError(
+        "OTP not sent, Please try again after sometime",
+        500
+      );
+    return res.status(201).json({
+      success: true,
+      message: "OTP has been sent successfully",
+    });
+  } catch (err) {
+    // Deleteing the OTP from db if the Email is not sent.
+    user.otp = undefined;
+    user.save({ validateBeforeSave: false });
+    throw new CustomError("OTP not sent, Please try again after sometime", 500);
+  }
+});
+
+export { createUser, loginUser, changePassword, logout, forgotPassword };

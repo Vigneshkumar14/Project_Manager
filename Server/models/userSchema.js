@@ -3,11 +3,18 @@ import bcrypt from "bcryptjs";
 import config from "../config/index.js";
 import cookieOptions from "../utils/cookieOptions.js";
 import JWT from "jsonwebtoken";
+import crypto from "crypto";
 
 const { Schema } = mongoose;
 
 const userSchema = new Schema(
   {
+    name: {
+      type: String,
+      trim: true,
+      required: [true, "Name is required"],
+      select: false,
+    },
     email: {
       type: String,
       trim: true,
@@ -29,11 +36,10 @@ const userSchema = new Schema(
       required: [true, "Error in Assigning role"],
       default: 0,
     },
-    // otp: {
-    //   type: String,
-    //   default: "",
-    //   createdAt: { type: Date, expires: "2m", default: Date.now },
-    // },
+    otp: {
+      type: String,
+      createdAt: { type: Date, expires: "10m", default: Date.now },
+    },
     project: {
       type: String,
       default: "noproject",
@@ -70,6 +76,14 @@ userSchema.methods = {
         expiresIn: config.EXPIRY,
       }
     );
+  },
+  getOtp: function () {
+    const genOtp = String(Math.floor(Math.random() * 9999)).padStart(4, 0);
+    this.otp = crypto
+      .createHash("sha256", config.SECRET)
+      .update(genOtp)
+      .digest("hex");
+    return genOtp;
   },
 };
 export default mongoose.model("User", userSchema);
