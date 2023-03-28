@@ -5,6 +5,8 @@ import asyncHandler from "../services/asyncHandler.js";
 import CustomError from "../utils/customError.js";
 import cookieOptions from "../utils/cookieOptions.js";
 import sendEmails from "../utils/mailHelper.js";
+import crypto from "crypto";
+import config from "../config/index.js";
 
 /******************************************************
  * @SIGNUP
@@ -157,7 +159,7 @@ const logout = (_req, res) => {
 };
 
 /******************************************************
- * @FORGOTPASSWORD
+ * @FORGOT_PASSWORD
  * @REQUEST_TYPE POST
  * @route http://localhost:8000/api/forgotpassword
  * @description User forgot passwword Controller to resset the password with OTP validation
@@ -205,4 +207,61 @@ const forgotPassword = asyncHandler(async (req, res) => {
   }
 });
 
-export { createUser, loginUser, changePassword, logout, forgotPassword };
+/******************************************************
+ * @RESET_PASSWORD
+ * @REQUEST_TYPE POST
+ * @route http://localhost:8000/api/resetpassword
+ * @description User forgot passwword Controller to resset the password with OTP validation
+ * @parameters EMAIL, OTP, PASSWORD, CONFIRM PASSWORD
+ * @returns Success message, User, Token
+ ******************************************************/
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { email, otp, password, confirmPassword } = req.body;
+  if (!(email && otp && password && confirmPassword))
+    throw new CustomError("Please enter all the required fields", 401);
+
+  if (!(password == confirmPassword))
+    throw new CustomError("Password and Confirm password does't match", 401);
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user)
+    throw new CustomError(
+      "Error Occured not able to get the User details please try later",
+      404
+    );
+
+  const encryptOtp = crypto
+    .createHash("sha256", config.SECRET)
+    .update(otp)
+    .digest("hex");
+
+  if (encryptOtp != user.otp) throw new CustomError("OTP doesn't match", 401);
+
+  if (encryptOtp == user.otp) {
+    user.password = password;
+    user.otp = undefined;
+    await user.save();
+    user.password = undefined;
+    const token = await user.getJWTtoken();
+
+    res.status(200).cookie("token", token, cookieOptions);
+
+    return res.status(200).json({
+      success: true,
+      messaage: "New password is saved successfully",
+      user,
+      token,
+    });
+  }
+});
+
+export {
+  createUser,
+  loginUser,
+  changePassword,
+  logout,
+  forgotPassword,
+  resetPassword,
+};

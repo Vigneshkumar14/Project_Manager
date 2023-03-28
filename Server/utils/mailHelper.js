@@ -29,11 +29,8 @@ const sendEmails = async (options) => {
     };
     const mailSuccess = await transpoter.sendMail(message);
     if (mailSuccess) return { success: true };
-
-    console.log(mailSuccess);
   } catch (err) {
-    throw new CustomError("OTP is not sent", 40);
-    console.log(err);
+    throw new CustomError("OTP is not sent", 500);
   }
 };
 
