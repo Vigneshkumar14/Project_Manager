@@ -19,7 +19,7 @@ app.use(cookieParser());
 app.use("/api", userRoutes);
 
 // Defect Routes
-app.use("/api", dRoutes);
+app.use("/api/defect", dRoutes);
 
 app.listen(config.PORT, () => {
   console.log(`Server is listeining to PORT ${config.PORT}`);

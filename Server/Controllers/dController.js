@@ -163,4 +163,54 @@ const deleteFileDefect = asyncHandler(async (req, res) => {
   });
 });
 
-export { createDefect, getAllUserCreatedDefect, deleteFileDefect };
+const updateDefect = asyncHandler(async (req, res) => {
+  const { defectId } = req.params;
+  const { ...updates } = req.body;
+
+  const defect = await Defect.findOne({
+    _id: defectId,
+  });
+  // const defect = await Defect.findOne({
+  //   $or: [{ defectId }, { userDefectId }],
+  // });
+
+  if (!defect) throw new CustomError("Defect not found", 404);
+
+  // Check if the current user is authorized to update the defect
+  // if (defect.createdBy.toString() !== req.user._id.toString()) {
+  //   return res.status(403).send({ error: "Unauthorized to update this defect" });
+  // }
+
+  // Create an object with the fields that need to be updated
+  const newFields = {};
+  Object.keys(updates).forEach((key) => {
+    if (defect[key] !== undefined) {
+      newFields[key] = updates[key];
+      console.log("new Fields of key", key, newFields[key]);
+      console.log("updates of key --------", key, updates[key]);
+    }
+  });
+
+  // Merge the new fields with the existing fields of the document
+  const updatedDefect = Object.assign(defect, newFields);
+
+  // // Save the updated document to the database
+  const updatedResult = await updatedDefect.save();
+
+  return res.json({
+    UpdatedFields: newFields,
+    success: true,
+    message: `Values of ${Object.keys(
+      newFields
+    ).toString()} are updated successfully in defect`,
+    updatedResult,
+  });
+  // res.send({ message: "Defect updated successfully", defect: updatedDefect });
+});
+
+export {
+  createDefect,
+  getAllUserCreatedDefect,
+  deleteFileDefect,
+  updateDefect,
+};
