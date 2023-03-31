@@ -14,6 +14,13 @@ const config = {
   SMTP_MAIL_USERNAME: process.env.SMTP_MAIL_USERNAME,
   SMTP_MAIL_PASSWORD: process.env.SMTP_MAIL_PASSWORD,
   SMTP_MAIL_EMAIL: process.env.SMTP_MAIL_EMAIL,
+
+  // Cloudinary variables
+
+  CLOUD_NAME: process.env.CLOUD_NAME,
+  API_KEY: process.env.API_KEY,
+  API_SECRET: process.env.API_SECRET,
+  CLOUDINARY_FOLDER_NAME: process.env.CLOUDINARY_FOLDER_NAME,
 };
 
 export default config;

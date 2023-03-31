@@ -21,6 +21,7 @@ export const isLoggedIn = asyncHandler(async (req, _res, next) => {
         401
       );
     req.user = await User.findById(decodeJwtPayload.id, "email role");
+
     // console.log(req.user._id.toString());
     next();
   } catch (err) {

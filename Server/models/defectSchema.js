@@ -32,6 +32,7 @@ const defect = new Schema(
         fileName: String,
         format: String,
         fileLink: String,
+        public_id: String,
         uploadedBy: {
           type: Schema.Types.ObjectId,
           ref: "User",
@@ -39,7 +40,10 @@ const defect = new Schema(
         uploadedOn: Date,
       },
     ],
-
+    description: {
+      type: String,
+      required: [true, "Description should be filled to create the defect"],
+    },
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -54,11 +58,6 @@ const defect = new Schema(
       default: Status[0],
       required: true,
     },
-    CreatedOn: {
-      type: Date,
-      required: true,
-      default: Date.now,
-    },
     lastUpdated: {
       type: Date,
     },
@@ -71,20 +70,20 @@ const defect = new Schema(
           type: Schema.Types.ObjectId,
           ref: "User",
         },
-        Commentss: [
-          {
-            defectdescription: String,
-            ddate: {
-              type: Date,
-              default: Date.now,
-            },
-          },
-        ],
+        Commentss: {
+          defectdescription: String,
+          // ddate: {
+          //   type: Date,
+          //   default: Date.now,
+          // },
+        },
         lastUpdated: {
           type: Date,
         },
+        createdAt: Date,
         modifed: {
           type: Boolean,
+          default: false,
         },
       },
     ],
