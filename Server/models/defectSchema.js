@@ -69,14 +69,9 @@ const defect = new Schema(
         userId: {
           type: Schema.Types.ObjectId,
           ref: "User",
+          require: [true, "userId is mandatory to add comments"],
         },
-        Commentss: {
-          defectdescription: String,
-          // ddate: {
-          //   type: Date,
-          //   default: Date.now,
-          // },
-        },
+        Comment: { type: String },
         lastUpdated: {
           type: Date,
         },

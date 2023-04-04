@@ -17,6 +17,7 @@ const createDefect = asyncHandler(async (req, res) => {
   });
 
   form.parse(req, async function (err, fields, files) {
+    console.log(files);
     try {
       if (err) throw new CustomError(err.message || "Formidable error", 500);
 
@@ -40,18 +41,30 @@ const createDefect = asyncHandler(async (req, res) => {
       }
 
       let defectId = new mongoose.Types.ObjectId().toHexString();
+      let fileArray = undefined;
 
-      if (Object.keys(files.attachments).length !== 0) {
+      if (
+        Object.keys(files).length > 0 &&
+        Object.keys(files.attachments).length !== 0
+      ) {
         const attachmentss = [];
 
-        for (const file of files.attachments) {
+        // for (const file of files.attachments) {
+        //   const attachment = {
+        //     fileName: file.originalFilename,
+        //     path: file.filepath,
+        //     format: file.originalFilename.split(".").pop(),
+        //   };
+        //   attachmentss.push(attachment);
+        // }
+        files.attachments.map((file) => {
           const attachment = {
             fileName: file.originalFilename,
             path: file.filepath,
             format: file.originalFilename.split(".").pop(),
           };
           attachmentss.push(attachment);
-        }
+        });
 
         let fileArrayResp = Promise.all(
           attachmentss.map(async (fileKey, index) => {
@@ -73,32 +86,34 @@ const createDefect = asyncHandler(async (req, res) => {
             };
           })
         );
-        let fileArray = await fileArrayResp;
 
-        const defect = await Defect.create({
-          _id: defectId,
-          title,
-          description,
-          assignee,
-          createdBy,
-          attachments: fileArray,
-          userDefectId,
-          Comments: {
-            defectdescription: comments,
-            userId: createdBy,
-            createdAt: Date.now(),
-          },
-          status,
-          project,
-        });
-
-        return res.status(201).json({
-          success: true,
-          message: "Defect Created Successfully",
-          defect,
-        });
+        fileArray = await fileArrayResp;
       }
+
+      const defect = await Defect.create({
+        _id: defectId,
+        title,
+        description,
+        assignee,
+        createdBy,
+        attachments: fileArray,
+        userDefectId,
+        Comments: {
+          Comment: comments,
+          userId: createdBy,
+          createdAt: Date.now(),
+        },
+        status,
+        project,
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Defect Created Successfully",
+        defect,
+      });
     } catch (err) {
+      console.log(err);
       throw new CustomError(
         err.message || "Error occured while creating a defect",
         500
@@ -178,7 +193,7 @@ const updateDefect = asyncHandler(async (req, res) => {
 
   // Check if the current user is authorized to update the defect
   // if (defect.createdBy.toString() !== req.user._id.toString()) {
-  //   return res.status(403).send({ error: "Unauthorized to update this defect" });
+  // throw new CustomError("Unauthorized to update this defect",403)
   // }
 
   // Create an object with the fields that need to be updated
@@ -205,7 +220,101 @@ const updateDefect = asyncHandler(async (req, res) => {
     ).toString()} are updated successfully in defect`,
     updatedResult,
   });
-  // res.send({ message: "Defect updated successfully", defect: updatedDefect });
+});
+
+const addComment = asyncHandler(async (req, res) => {
+  const { defectId, commentId } = req.params;
+  const { Comment } = req.body;
+  const { _id: userId } = req.user;
+
+  if (!defectId) throw new CustomError("Please refresh and try again", 401);
+  if (!Comment) throw new CustomError("Please enter the Comment", 401);
+
+  const defect = await Defect.findById(defectId);
+  if (!defect) throw new CustomError("Defect not found", 404);
+
+  if (commentId) {
+    const commentIndex = defect.Comments.findIndex(
+      (comment) => comment._id.toString() === commentId
+    );
+    if (commentIndex !== -1) {
+      if (
+        !(userId.toString() === defect.Comments[commentIndex].userId.toString())
+      )
+        throw new CustomError(
+          "Not authorized to edit this comment as this was not added by you",
+          401
+        );
+      const editedDefect = await Defect.findOneAndUpdate(
+        {
+          _id: defectId,
+          "Comments._id": commentId,
+        },
+        {
+          $set: {
+            "Comments.$.Comment": Comment,
+            "Comments.$.lastUpdated": new Date(),
+            "Comments.$.modifed": true,
+          },
+        },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        success: true,
+        messgae: "Comment is updated",
+        editedDefect,
+      });
+    }
+  }
+  const newComment = {
+    userId: userId,
+    Comment: Comment,
+    createdAt: new Date(),
+  };
+  // console.log(newComment);
+
+  defect.Comments.push(newComment);
+
+  defect.save();
+  return res.status(200).json({
+    success: true,
+    message: "New Comment is added",
+    defect,
+  });
+});
+
+const deleteComment = asyncHandler(async (req, res) => {
+  const { defectId, commentId } = req.params;
+  const { _id: userId } = req.user;
+
+  if (!defectId) throw new CustomError("Please refresh and try again", 401);
+  if (!commentId) throw new CustomError("Please refresh and try again", 401);
+
+  const defect = await Defect.findOneAndUpdate(
+    {
+      _id: defectId,
+    },
+    { $pull: { Comments: { _id: commentId, userId: userId } } },
+    { new: true }
+  );
+
+  if (!defect) throw new CustomError("Defect not Found", 404);
+  else if (!defect.Comments.some((comment) => comment._id.equals(commentId))) {
+    throw new CustomError("Comment not found", 404);
+  } else if (
+    defect.Comments.some(
+      (comment) => comment._id.equals(commentId) && comment.userId !== userId
+    )
+  ) {
+    throw new CustomError("User not authorized", 401);
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Comment deleted successfully",
+    defect,
+  });
 });
 
 export {
@@ -213,4 +322,6 @@ export {
   getAllUserCreatedDefect,
   deleteFileDefect,
   updateDefect,
+  addComment,
+  deleteComment,
 };
