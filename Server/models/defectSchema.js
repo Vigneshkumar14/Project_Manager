@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
+let Prioitiy = ["low", "medium", "high", "critical"];
+
 let Status = [
   "new",
   "not started",
@@ -26,6 +28,12 @@ const defect = new Schema(
     title: {
       type: String,
       required: true,
+    },
+    prioitiy: {
+      type: String,
+      enum: Prioitiy,
+      default: Prioitiy[0],
+      required: [true, "Priority is mandatory field"],
     },
     attachments: [
       {
@@ -62,7 +70,8 @@ const defect = new Schema(
       type: Date,
     },
     project: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "Project",
     },
     Comments: [
       {

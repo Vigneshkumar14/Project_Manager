@@ -201,8 +201,8 @@ const updateDefect = asyncHandler(async (req, res) => {
   Object.keys(updates).forEach((key) => {
     if (defect[key] !== undefined) {
       newFields[key] = updates[key];
-      console.log("new Fields of key", key, newFields[key]);
-      console.log("updates of key --------", key, updates[key]);
+      // console.log("new Fields of key", key, newFields[key]);
+      // console.log("updates of key --------", key, updates[key]);
     }
   });
 
@@ -317,6 +317,22 @@ const deleteComment = asyncHandler(async (req, res) => {
   });
 });
 
+const getDefect = asyncHandler(async (req, res) => {
+  const { userDefectId } = req.params;
+
+  if (!userDefectId)
+    throw new CustomError("Not able to get the defect details", 500);
+
+  const defect = await Defect.findOne({ userDefectId: userDefectId });
+
+  if (!defect) throw new CustomError("Defect not found", 404);
+  return res.status(200).json({
+    success: true,
+    message: "Defect details fetched successfully",
+    defect,
+  });
+});
+
 export {
   createDefect,
   getAllUserCreatedDefect,
@@ -324,4 +340,5 @@ export {
   updateDefect,
   addComment,
   deleteComment,
+  getDefect,
 };
