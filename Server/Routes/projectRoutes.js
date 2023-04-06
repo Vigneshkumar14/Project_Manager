@@ -3,6 +3,7 @@ import {
   addCollaborators,
   createProject,
   deleteProject,
+  getAllProject,
   getProjectWithId,
   updateProject,
 } from "../Controllers/projectController.js";
@@ -15,6 +16,6 @@ router.put("/edit/:projectId", isLoggedIn, updateProject);
 router.put("/edit/:projectId/addcollabarators", isLoggedIn, addCollaborators);
 router.delete("/delete/:projectId", isLoggedIn, isAdmin, deleteProject);
 router.get("/:projectId", isLoggedIn, getProjectWithId);
-// router.get("/all", isLoggedIn, isAdmin);
+router.get("/", isLoggedIn, isAdmin, getAllProject);
 
 export default router;

@@ -129,11 +129,38 @@ const getProjectWithId = asyncHandler(async (req, res) => {
   });
 });
 
-// const getAllProject = asyncHandler(async(req))
+const getAllProject = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const startIndex = (page - 1) * limit;
+  const totalRecords = await Project.countDocuments();
+  const totalPages = Math.ceil(totalRecords / limit);
+
+  if (page > totalPages) throw new CustomError("Page doesn't exist", 404);
+
+  const project = await Project.find()
+    .populate("owner collaborators", "email")
+    .skip(startIndex)
+    .limit(limit);
+
+  const pages = {
+    totalPages,
+    totalRecords,
+    page,
+    limit,
+  };
+
+  return res.status(200).json({
+    success: true,
+    project,
+    pages,
+  });
+});
 export {
   createProject,
   updateProject,
   addCollaborators,
   deleteProject,
   getProjectWithId,
+  getAllProject,
 };
