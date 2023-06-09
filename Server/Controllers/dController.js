@@ -15,66 +15,72 @@ const createDefect = asyncHandler(async (req, res) => {
     keepExtensions: true,
     maxFileSize: 5 * 1024 * 1024, // 5 MB
   });
+  try {
+    const { fields, files } = await new Promise((resolve, reject) => {
+      form.parse(req, async function (err, fields, files) {
+        if (err) {
+          reject(new CustomError("Formidable error", 500));
+        } else {
+          resolve({ fields, files });
+        }
+      });
+    });
 
-  form.parse(req, async function (err, fields, files) {
-    console.log(files);
-    try {
-      if (err) throw new CustomError(err.message || "Formidable error", 500);
+    const { title, assignee, status, project, comments, description } = fields;
 
-      const { title, assignee, status, project, comments, description } =
-        fields;
-      if (!title || !description) {
-        throw new CustomError("Please enter the title", 401);
+    if (!title || !description) {
+      throw new CustomError("Please enter the title and description", 401);
+    }
+
+    let userDefectId = String(await Defect.count({}));
+
+    userDefectId = "DE-" + userDefectId.padStart(4, "0");
+
+    const defectCheck = await Defect.findOne({ userDefectId: userDefectId });
+
+    if (defectCheck) {
+      throw new CustomError(
+        "Defect number error please contact your administrator",
+        401
+      );
+    }
+
+    let defectId = new mongoose.Types.ObjectId().toHexString();
+    let fileArray = undefined;
+
+    let updatedFiles = "";
+    if (typeof files === "object" && files !== null) {
+      updatedFiles = Object.values(files);
+    }
+    updatedFiles = updatedFiles.flat();
+
+    if (updatedFiles.length > 0) {
+      const attachmentss = [];
+      const uploadData = updatedFiles;
+      // Array.isArray(updatedFiles)
+      //   ? updatedFiles
+      //   : [updatedFiles];
+
+      for (const file of uploadData) {
+        console.log("File", file);
+        const attachment = {
+          fileName: file.originalFilename,
+          path: file.filepath,
+          format: String(file.originalFilename).split(".").pop(),
+        };
+        console.log("Attachment", attachment);
+        attachmentss.push(attachment);
       }
 
-      let userDefectId = String(await Defect.count({}));
-
-      userDefectId = "DE-" + userDefectId.padStart(4, "0");
-
-      const defectCheck = await Defect.findOne({ userDefectId: userDefectId });
-
-      if (defectCheck) {
-        throw new CustomError(
-          "Defect number error please contact your administrator",
-          401
-        );
-      }
-
-      let defectId = new mongoose.Types.ObjectId().toHexString();
-      let fileArray = undefined;
-
-      if (
-        Object.keys(files).length > 0 &&
-        Object.keys(files.attachments).length !== 0
-      ) {
-        const attachmentss = [];
-
-        // for (const file of files.attachments) {
-        //   const attachment = {
-        //     fileName: file.originalFilename,
-        //     path: file.filepath,
-        //     format: file.originalFilename.split(".").pop(),
-        //   };
-        //   attachmentss.push(attachment);
-        // }
-        files.attachments.map((file) => {
-          const attachment = {
-            fileName: file.originalFilename,
-            path: file.filepath,
-            format: file.originalFilename.split(".").pop(),
+      let fileArrayResp = Promise.all(
+        attachmentss.map(async (fileKey, index) => {
+          let fileData = {
+            id: `${defectId}_${createdBy}_${fileKey.fileName}`,
+            name: fileKey.fileName,
+            pathName: "ProjectManagement",
+            path: fileKey.path,
           };
-          attachmentss.push(attachment);
-        });
-
-        let fileArrayResp = Promise.all(
-          attachmentss.map(async (fileKey, index) => {
-            let fileData = {
-              id: `${defectId}_${createdBy}_${fileKey.fileName}`,
-              name: fileKey.fileName,
-              pathName: "ProjectManagement",
-              path: fileKey.path,
-            };
-
+          try {
             const result = await uploadFile(fileData);
 
             return {
@@ -83,43 +89,57 @@ const createDefect = asyncHandler(async (req, res) => {
               fileLink: result.secure_url,
               uploadedBy: createdBy,
               public_id: result.public_id,
+              uploadedOn: new Date(),
             };
-          })
-        );
-
-        fileArray = await fileArrayResp;
-      }
-
-      const defect = await Defect.create({
-        _id: defectId,
-        title,
-        description,
-        assignee,
-        createdBy,
-        attachments: fileArray,
-        userDefectId,
-        Comments: {
-          Comment: comments,
-          userId: createdBy,
-          createdAt: Date.now(),
-        },
-        status,
-        project,
-      });
-
-      return res.status(201).json({
-        success: true,
-        message: "Defect Created Successfully",
-        defect,
-      });
-    } catch (err) {
-      console.log(err);
-      throw new CustomError(
-        err.message || "Error occured while creating a defect",
-        500
+          } catch (err) {
+            throw new CustomError(
+              err.message || "Error while uploading the file",
+              500
+            );
+          }
+        })
       );
+
+      try {
+        fileArray = await fileArrayResp;
+        console.log("fileArray", fileArray);
+      } catch (err) {
+        throw new CustomError(
+          err.message || "Error occured while uploading",
+          500
+        );
+      }
     }
-  });
+
+    const defect = await Defect.create({
+      _id: defectId,
+      title,
+      description,
+      assignee,
+      createdBy,
+      attachments: fileArray,
+      userDefectId,
+      Comments: {
+        Comment: comments,
+        userId: createdBy,
+        createdAt: Date.now(),
+      },
+      status,
+      project,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Defect Created Successfully",
+      defect,
+    });
+  } catch (err) {
+    console.log(err);
+    throw new CustomError(
+      err.message || "Error occured while creating a defect",
+      500
+    );
+  }
 });
 
 const getAllUserCreatedDefect = asyncHandler(async (req, res) => {
@@ -230,7 +250,9 @@ const addComment = asyncHandler(async (req, res) => {
   if (!defectId) throw new CustomError("Please refresh and try again", 401);
   if (!Comment) throw new CustomError("Please enter the Comment", 401);
 
-  const defect = await Defect.findById(defectId);
+  const defect = await Defect.findById(defectId)
+    .populate("assignee createdBy", "name email")
+    .populate("Comments.userId", "name email avatar");
   if (!defect) throw new CustomError("Defect not found", 404);
 
   if (commentId) {
@@ -238,13 +260,13 @@ const addComment = asyncHandler(async (req, res) => {
       (comment) => comment._id.toString() === commentId
     );
     if (commentIndex !== -1) {
-      if (
-        !(userId.toString() === defect.Comments[commentIndex].userId.toString())
-      )
-        throw new CustomError(
-          "Not authorized to edit this comment as this was not added by you",
-          401
-        );
+      // if (
+      //   !(userId.toString() === defect.Comments[commentIndex].userId.toString())
+      // )
+      //   throw new CustomError(
+      //     "Not authorized to edit this comment as this was not added by you",
+      //     401
+      //   );
       const editedDefect = await Defect.findOneAndUpdate(
         {
           _id: defectId,
@@ -258,29 +280,36 @@ const addComment = asyncHandler(async (req, res) => {
           },
         },
         { new: true }
-      );
+      )
+        .populate("assignee createdBy", "name email")
+        .populate("Comments.userId", "name email avatar");
 
       return res.status(200).json({
         success: true,
         messgae: "Comment is updated",
-        editedDefect,
+        defect: editedDefect,
       });
     }
   }
+
   const newComment = {
     userId: userId,
     Comment: Comment,
     createdAt: new Date(),
   };
-  // console.log(newComment);
 
   defect.Comments.push(newComment);
 
-  defect.save();
-  return res.status(200).json({
-    success: true,
-    message: "New Comment is added",
-    defect,
+  defect.save().then(async () => {
+    const updatedDefect = await Defect.findById(defectId)
+      .populate("assignee createdBy", "name email")
+      .populate("Comments.userId", "name email avatar");
+
+    return res.status(200).json({
+      success: true,
+      message: "New Comment is added",
+      defect: updatedDefect,
+    });
   });
 });
 
@@ -295,20 +324,23 @@ const deleteComment = asyncHandler(async (req, res) => {
     {
       _id: defectId,
     },
-    { $pull: { Comments: { _id: commentId, userId: userId } } },
+    { $pull: { Comments: { _id: commentId } } },
     { new: true }
   );
 
+  // , userId: userId
+
   if (!defect) throw new CustomError("Defect not Found", 404);
-  else if (!defect.Comments.some((comment) => comment._id.equals(commentId))) {
-    throw new CustomError("Comment not found", 404);
-  } else if (
-    defect.Comments.some(
-      (comment) => comment._id.equals(commentId) && comment.userId !== userId
-    )
-  ) {
-    throw new CustomError("User not authorized", 401);
-  }
+  // else if (!defect.Comments.some((comment) => comment._id.equals(commentId))) {
+  //   throw new CustomError("Comment not found", 404);
+  // }
+  // else if (
+  //   defect.Comments.some(
+  //     (comment) => comment._id.equals(commentId) && comment.userId !== userId
+  //   )
+  // ) {
+  //   throw new CustomError("User not authorized", 401);
+  // }
 
   return res.status(200).json({
     success: true,
@@ -323,13 +355,166 @@ const getDefect = asyncHandler(async (req, res) => {
   if (!userDefectId)
     throw new CustomError("Not able to get the defect details", 500);
 
-  const defect = await Defect.findOne({ userDefectId: userDefectId });
+  const defect = await Defect.findOne({ userDefectId: userDefectId })
+    .populate("assignee createdBy", "name email")
+    .populate("Comments.userId attachments.uploadedBy", "name email avatar");
 
   if (!defect) throw new CustomError("Defect not found", 404);
   return res.status(200).json({
     success: true,
     message: "Defect details fetched successfully",
     defect,
+  });
+});
+
+const updateAttachment = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { defectId } = req.params;
+
+  const form = formidable({
+    multiples: true,
+    keepExtensions: true,
+    maxFileSize: 5 * 1024 * 1024, // 5 MB
+  });
+  try {
+    const { fields, files } = await new Promise((resolve, reject) => {
+      form.parse(req, async function (err, fields, files) {
+        if (err) {
+          reject(new CustomError("Formidable error", 500));
+        } else {
+          resolve({ fields, files });
+        }
+      });
+    });
+
+    const defect = await Defect.findById(defectId);
+
+    if (!defect) throw new CustomError("Defect not found", 404);
+
+    let updatedFiles = "";
+    if (typeof files === "object" && files !== null) {
+      updatedFiles = Object.values(files);
+    }
+    updatedFiles = updatedFiles.flat();
+    let fileArray = "";
+
+    if (updatedFiles.length > 0) {
+      const attachmentss = [];
+      const uploadData = updatedFiles;
+      for (const file of uploadData) {
+        const attachment = {
+          fileName: file.originalFilename,
+          path: file.filepath,
+          format: String(file.originalFilename).split(".").pop(),
+        };
+        attachmentss.push(attachment);
+      }
+
+      let fileArrayResp = Promise.all(
+        attachmentss.map(async (fileKey, index) => {
+          let fileData = {
+            id: `${defectId}_${_id}_${fileKey.fileName}`,
+            name: fileKey.fileName,
+            pathName: "ProjectManagement",
+            path: fileKey.path,
+          };
+          try {
+            const result = await uploadFile(fileData);
+
+            return {
+              fileName: fileKey.fileName,
+              format: fileKey.format,
+              fileLink: result.secure_url,
+              uploadedBy: _id,
+              public_id: result.public_id,
+              uploadedOn: new Date(),
+            };
+          } catch (err) {
+            throw new CustomError(
+              err.message || "Error while uploading the file",
+              500
+            );
+          }
+        })
+      );
+
+      try {
+        fileArray = await fileArrayResp;
+      } catch (err) {
+        throw new CustomError(
+          err.message || "Error occured while uploading",
+          500
+        );
+      }
+    }
+
+    defect.attachments.push(...fileArray);
+    defect.save().then(async () => {
+      const updatedDefect = await Defect.findById(defectId).populate(
+        "attachments.uploadedBy",
+        "name avatar email"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "New attachments are added",
+        defect: updatedDefect,
+      });
+    });
+  } catch (err) {
+    throw new CustomError(err.message || "error while uploading the file", 500);
+  }
+});
+
+const deleteAttachment = asyncHandler(async (req, res) => {
+  const { defectId, attachmentId } = req.params;
+  const { public_id } = req.body;
+
+  try {
+    const result = await deleteFile(public_id);
+    console.log(result);
+  } catch (err) {
+    throw new CustomError(err.message || "Error while deleting the file", 500);
+  }
+
+  const defect = await Defect.findOneAndUpdate(
+    {
+      _id: defectId,
+    },
+    { $pull: { attachments: { _id: attachmentId } } },
+    { new: true }
+  ).populate("attachments.uploadedBy", "name email avatar");
+
+  if (!defect) throw new CustomError("Defect not found", 404);
+
+  return res.status(201).json({
+    success: true,
+    message: "attachment deleted successfully",
+    defect,
+  });
+});
+
+const searchDefect = asyncHandler(async (req, res) => {
+  const { key } = req.params;
+  if (!key) throw new CustomError("Please enter a value to search", 401);
+
+  const data = await Defect.find(
+    {
+      $or: [
+        { userDefectId: { $regex: key, $options: "i" } },
+        { title: { $regex: key, $options: "i" } },
+        { description: { $regex: key, $options: "i" } },
+      ],
+    },
+    "userDefectId"
+  ).limit(6);
+
+  if (!data) throw new CustomError("No results found", 404);
+
+  return res.status(201).json({
+    success: true,
+    message: "Search results fetched successfully",
+    searchResult: data,
   });
 });
 
@@ -341,4 +526,44 @@ export {
   addComment,
   deleteComment,
   getDefect,
+  updateAttachment,
+  deleteAttachment,
+  searchDefect,
 };
+
+// app.get('/api/myData', async (req, res) => {
+//   const filters = {};
+//   for (const field in req.query) {
+//     if (req.query[field]) {
+//       filters[field] = { $regex: new RegExp(req.query[field], 'i') };
+//     }
+//   }
+
+//   const myData = await MyModel.find(filters);
+
+//   res.json({
+//     data: myData
+//   });
+// });
+
+// app.get('/api/myData', async (req, res) => {
+//   try {
+//     const filters = {};
+//     if (req.query.name) {
+//       const reg = new RegExp(req.query.name, 'i');
+//       filters.name = { $regex: reg };
+//     }
+//     if (req.query.age) {
+//       filters.age = req.query.age;
+//     }
+
+//     const myData = await MyModel.find(filters);
+
+//     res.json({
+//       data: myData
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });

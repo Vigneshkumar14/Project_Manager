@@ -1,27 +1,42 @@
-import axios from "axios";
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, reset } from "../store/user/user.reducer";
+import { Link, useNavigate } from "react-router-dom";
+import { Spinner } from "../components/Loading.spinner";
 function Login() {
   const [user, setUser] = useState({ email: "", password: "" });
+  const [errorMessage, setErrorMessage] = useState(null);
+  const dispatch = useDispatch();
+  const { currentUser, isLoading, error } = useSelector((state) => state.user);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (currentUser !== "") {
+      navigate("/");
+      dispatch(reset());
+      console.log("From Useeffect", currentUser);
+    }
+
+    if (error !== "") {
+      setErrorMessage(error);
+    }
+
+    console.log("UseEffect", errorMessage);
+  }, [currentUser, isLoading, error, errorMessage, dispatch, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(process.env);
+    setErrorMessage(null);
 
     if (!user.email || !user.password)
-      throw new Error("Please enter email and password");
+      setErrorMessage("Please enter email and password");
 
-    const result = await axios.post(
-      `${process.env.REACT_APP_BASE_URL}/api/login`,
-      { email: user.email, password: user.password },
-      {
-        withCredentials: true,
-      }
-    );
-    console.log(result);
+    dispatch(loginUser(user));
   };
 
-  return (
+  return isLoading ? (
+    <Spinner />
+  ) : (
     <div className="min-h-screen items-center justify-center text-gray-300 bg-darkBackground  ">
       <div className="w-full font-montserrat text-center mb-20 p-5 font-extrabold text-transparent text-3xl md:text-4xl bg-clip-text bg-gradient-to-r from-slate-500 to-slate-600 bg-clip-text text-transparent">
         Orchestr8
@@ -119,6 +134,9 @@ function Login() {
                   </button>
                 </div>
               </div>
+              {errorMessage ? (
+                <h3 className="text-red-500 text-center"> {errorMessage}</h3>
+              ) : null}
 
               <div className="flex w-full">
                 <button
@@ -144,9 +162,8 @@ function Login() {
             </form>
           </div>
           <div className="flex justify-center items-center mt-6">
-            <a
-              href="#"
-              target="_blank"
+            <Link
+              to="/register"
               className="inline-flex items-center font-bold text-blue-500 hover:text-blue-700 text-xs text-center"
             >
               <span>
@@ -163,7 +180,7 @@ function Login() {
                 </svg>
               </span>
               <button className="ml-2">You don't have an account?</button>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

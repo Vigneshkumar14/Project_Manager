@@ -3,10 +3,13 @@ const router = express.Router();
 import {
   addComment,
   createDefect,
+  deleteAttachment,
   deleteComment,
   deleteFileDefect,
   getAllUserCreatedDefect,
   getDefect,
+  searchDefect,
+  updateAttachment,
   updateDefect,
 } from "../Controllers/dController.js";
 import { isLoggedIn } from "../middlewares/Auth.middleware.js";
@@ -19,9 +22,19 @@ router.put("/update/:defectId", isLoggedIn, updateDefect);
 router.put("/update/:defectId/comment", isLoggedIn, addComment);
 router.put("/update/:defectId/comment/:commentId", isLoggedIn, addComment);
 router.delete(
-  "/delete/:defectId/comment/:commentId",
+  "/delete/:defectId/comment/:commentId/",
   isLoggedIn,
   deleteComment
 );
+
+router.put("/update/:defectId/attachment/", isLoggedIn, updateAttachment);
+
+router.delete(
+  "/delete/:defectId/attachment/:attachmentId/",
+  isLoggedIn,
+  deleteAttachment
+);
+
+router.get("/search/:key", isLoggedIn, searchDefect);
 
 export default router;

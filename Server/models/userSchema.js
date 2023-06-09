@@ -7,6 +7,26 @@ import crypto from "crypto";
 
 const { Schema } = mongoose;
 
+const avatarValues = {
+  avatar1:
+    "https://res.cloudinary.com/dingkurgz/image/upload/v1683862655/ProjectManagement/Avatar/256_1_jmvtrw.png",
+  avatar2:
+    "https://res.cloudinary.com/dingkurgz/image/upload/v1683862655/ProjectManagement/Avatar/256_13_ljjdpo.png",
+  avatar3:
+    "https://res.cloudinary.com/dingkurgz/image/upload/v1683862655/ProjectManagement/Avatar/256_15_vd6kdy.png",
+  avatar4:
+    "https://res.cloudinary.com/dingkurgz/image/upload/v1683862654/ProjectManagement/Avatar/256_9_nz5lc2.png",
+  avatar5:
+    "https://res.cloudinary.com/dingkurgz/image/upload/v1683862654/ProjectManagement/Avatar/256_12_mq8rla.png",
+  avatar6:
+    "https://res.cloudinary.com/dingkurgz/image/upload/v1683862654/ProjectManagement/Avatar/256_6_jtt5xc.png",
+};
+
+const defaultAvatar =
+  Object.keys(avatarValues)[
+    Math.floor(Math.random() * Object.keys(avatarValues).length)
+  ];
+
 const userSchema = new Schema(
   {
     name: {
@@ -46,6 +66,14 @@ const userSchema = new Schema(
     },
     position: {
       type: String,
+    },
+    avatar: {
+      type: String,
+      enum: {
+        values: Object.values(avatarValues),
+        message: "Invalid avatar option",
+      },
+      default: avatarValues[defaultAvatar],
     },
   },
   { timestamps: true }

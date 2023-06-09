@@ -6,6 +6,7 @@ import User from "../models/userSchema.js";
 
 export const isLoggedIn = asyncHandler(async (req, _res, next) => {
   let token = req.cookies.token;
+
   if (!token)
     throw new CustomError(
       `token doesn't exist, Please try logging in again`,

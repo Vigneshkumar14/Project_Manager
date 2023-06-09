@@ -1,7 +1,8 @@
 class CustomError extends Error {
   constructor(message, code) {
     super(message);
-    this.code = code;
+    console.log("Cutomerr", message);
+    this.code = code || 500;
   }
 }
 

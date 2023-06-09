@@ -18,14 +18,22 @@ const uploadFile = async ({ id, name, pathName, path }) => {
       const result = await cloudinary.uploader.upload(path, options);
       resolve(result);
     } catch (err) {
-      reject(err);
-      throw new CustomError("Error while uploading file", 500);
+      console.log("file error", err);
+      reject(new CustomError(err.message || "Error while uploading file", 400));
     }
   });
 };
 
-const deleteFile = async ({ id }) => {
-  return await cloudinary.uploader.destroy(id).promise();
+const deleteFile = async (id) => {
+  try {
+    const result = await cloudinary.uploader.destroy(id);
+    if (result.result !== "ok") throw new CustomError("File Not found", 404);
+    console.log("Delete", result);
+    return result;
+  } catch (err) {
+    console.log("Delete Error", err);
+    throw new CustomError(err.message || "Error while deleting the file", 500);
+  }
 };
 
 export { uploadFile, deleteFile };

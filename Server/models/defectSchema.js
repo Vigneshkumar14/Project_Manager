@@ -8,7 +8,7 @@ let Status = [
   "new",
   "not started",
   "in progress",
-  "testing in progress",
+  // "testing in progress",
   "retest",
   "closed",
   "reopened",

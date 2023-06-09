@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
+// import mongoose from "mongoose";
+// import bcrypt from "bcryptjs";
 import User from "../models/userSchema.js";
 import asyncHandler from "../services/asyncHandler.js";
 import CustomError from "../utils/customError.js";
@@ -45,7 +45,6 @@ const createUser = asyncHandler(async (req, res) => {
 
   user.password = undefined;
   user.role = undefined;
-  user.name = undefined;
 
   return res.status(201).json({
     success: true,
@@ -71,7 +70,9 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new CustomError("Please enter the email & password", 401);
 
   // Trying to find the email in the Database
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email }).select(
+    "name email password avatar"
+  );
   if (!user) throw new CustomError("User doen't exist", 401);
 
   // Comparig the Passwords
