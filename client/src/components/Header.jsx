@@ -101,7 +101,7 @@ export const Header = () => {
           </div>
           <Navbar.Toggle />
         </div>
-        <Navbar.Collapse className="flex items-center justify-center text-center">
+        <Navbar.Collapse className="flex items-center justify-center text-lg  text-center">
           <NavLink
             to="/"
             className={({ isActive }) =>

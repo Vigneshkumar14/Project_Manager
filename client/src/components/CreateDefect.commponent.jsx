@@ -8,7 +8,7 @@ import { Dropzone } from "./Dropzone";
 
 import { useNavigate } from "react-router-dom";
 
-export const CreateDefect_commponent = () => {
+export const CreateDefectCommponent = () => {
   const [editingField, setEditingField] = useState("");
   const [values, setValues] = useState({
     title: "",

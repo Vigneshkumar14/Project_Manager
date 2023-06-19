@@ -21,7 +21,8 @@ function Login() {
       setErrorMessage(error);
     }
 
-    console.log("UseEffect", errorMessage);
+    document.title = "Login - Orchestr8";
+    // console.log("UseEffect", errorMessage);
   }, [currentUser, isLoading, error, errorMessage, dispatch, navigate]);
 
   const handleSubmit = async (e) => {

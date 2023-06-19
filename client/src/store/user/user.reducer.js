@@ -48,10 +48,15 @@ export const userSlice = createSlice({
       state.isLoading = "";
       state.error = "";
     },
+    resetUser(state) {
+      localStorage.removeItem("user");
+      state.currentUser = "";
+      state.isLoading = "";
+      state.error = "";
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(loginUser.pending, (state) => {
-      console.log(state);
       state.isLoading = true;
     });
     builder.addCase(loginUser.fulfilled, (state, action) => {
@@ -76,5 +81,5 @@ export const userSlice = createSlice({
   },
 });
 
-export const { reset } = userSlice.actions;
+export const { reset, resetUser } = userSlice.actions;
 export const userReducer = userSlice.reducer;

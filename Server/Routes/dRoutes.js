@@ -2,10 +2,12 @@ import express from "express";
 const router = express.Router();
 import {
   addComment,
+  assigneeAutocomplete,
   createDefect,
   deleteAttachment,
   deleteComment,
   deleteFileDefect,
+  getAllAssignedToUser,
   getAllUserCreatedDefect,
   getDefect,
   searchDefect,
@@ -16,6 +18,7 @@ import { isLoggedIn } from "../middlewares/Auth.middleware.js";
 
 router.post("/create", isLoggedIn, createDefect);
 router.get("/user", isLoggedIn, getAllUserCreatedDefect);
+router.get("/userassignee", isLoggedIn, getAllAssignedToUser);
 router.get("/:userDefectId", isLoggedIn, getDefect);
 router.post("/delete", isLoggedIn, deleteFileDefect);
 router.put("/update/:defectId", isLoggedIn, updateDefect);
@@ -36,5 +39,5 @@ router.delete(
 );
 
 router.get("/search/:key", isLoggedIn, searchDefect);
-
+router.get("/search/user/:key", isLoggedIn, assigneeAutocomplete);
 export default router;

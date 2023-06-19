@@ -6,7 +6,6 @@ import {
   AiOutlineCheck,
   AiOutlinePlus,
   AiOutlinePaperClip,
-  AiFillDelete,
   AiOutlineDelete,
 } from "react-icons/ai";
 import JoditEditor from "jodit-react";
@@ -20,6 +19,7 @@ import {
 } from "../store/defect/defect.reducer";
 import { useDispatch, useSelector } from "react-redux";
 import { Dropzone } from "./Dropzone";
+import Autocomplete from "./Autocomplete";
 
 export const Defect = () => {
   const [editingField, setEditingField] = useState("");
@@ -108,7 +108,6 @@ export const Defect = () => {
           })
         );
         stopEditing();
-
         break;
 
       default:
@@ -128,10 +127,13 @@ export const Defect = () => {
     stopEditing();
   };
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
+  // const handleInputChange = async (event) => {
+  //   const { name, value } = event.target;
+  //   setValues({ ...values, name: name, value: value });
+  // };
 
-    setValues({ ...values, name: name, value: value });
+  const handleAssignee = () => {
+    stopEditing();
   };
 
   const handleSelectChange = (event) => {
@@ -195,32 +197,17 @@ export const Defect = () => {
         </div>
 
         {/* People Container */}
-        <div className="md:w-2/6 mt-5 md:mt-0 bg-darkSurface">
+        <div className="md:w-2/6 mt-5 md:mt-0 bg-darkSurface space-y-3 pb-3 px-2">
           <h1 className="px-5 pt-5 font-bold text-lg">People</h1>
 
           <div className="flex flex-row gap-4 justify-start md:justify-evenly md:p-5 md:w-full">
             {/* <div className="flex > */}
             <div>
-              <h1 className="font-semibold ">Assignee :</h1>
+              <h1 className="font-semibold shrink-0">Assignee :</h1>
             </div>
 
             {editingField === "assignee" ? (
-              <div>
-                <input
-                  className="bg-darkBackground"
-                  type="text"
-                  name="assignee"
-                  value={values.value}
-                  onChange={handleInputChange}
-                  onBlur={stopEditing}
-                />
-                <button
-                  onClick={handleSave}
-                  className="bg-inputbg rounded-lg -m-4 pb-1"
-                >
-                  <AiOutlineCheck />
-                </button>
-              </div>
+              <Autocomplete change={handleAssignee} />
             ) : (
               <div>
                 <Tooltip

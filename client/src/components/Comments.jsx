@@ -60,7 +60,6 @@ export const Comments = ({ id }) => {
 
     if (c?.modifed) {
       updatedDate = new Date(c?.lastUpdated).toLocaleString("en-US", options);
-      console.log(updatedDate);
     }
 
     return (

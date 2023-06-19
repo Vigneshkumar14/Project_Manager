@@ -31,10 +31,9 @@ export const updateExistingDefect = createAsyncThunk(
   "defect/updateExistingDefect",
   async ({ defectId, updates, field }, thunkAPI) => {
     try {
-      console.log("updates", updates);
       const result = await updateDefect(defectId, { updates });
 
-      return result.UpdatedFields;
+      return result;
     } catch (err) {
       const message =
         (err.response && err.response.data && err.response.data.message) ||
@@ -195,8 +194,8 @@ export const defectSlice = createSlice({
     });
     builder.addCase(updateExistingDefect.fulfilled, (state, action) => {
       state.isLoading = false;
-      console.log("Reducer", action.payload);
-      const UpdatedField = action.payload;
+      const UpdatedField = action.payload.UpdatedFields;
+      const updatedAssignee = action.payload.defect.assignee;
       Object.entries(UpdatedField).forEach(([key, value]) => {
         if (key === "description") {
           state.defectDetails.defect.description = value;
@@ -210,6 +209,9 @@ export const defectSlice = createSlice({
         if (key === "prioitiy") {
           state.defectDetails.defect.prioitiy = value;
         }
+        if (key === "assignee") {
+          state.defectDetails.defect.assignee = updatedAssignee;
+        }
       });
     });
     builder.addCase(updateExistingDefect.rejected, (state, action) => {
@@ -221,7 +223,6 @@ export const defectSlice = createSlice({
     });
     builder.addCase(deleteComment.fulfilled, (state, action) => {
       state.isLoading = false;
-      console.log("Reducer", action.payload);
       const newComments = action.payload.defect.Comments;
       const Ids = newComments.map((comment) => comment._id);
       const existingComments = state.defectDetails.defect.Comments;

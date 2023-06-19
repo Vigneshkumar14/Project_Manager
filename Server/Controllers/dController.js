@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import Defect from "../models/defectSchema.js";
 import formidable from "formidable";
 import asyncHandler from "../services/asyncHandler.js";
-import fs from "fs";
+import User from "../models/userSchema.js";
 import CustomError from "../utils/customError.js";
 import { uploadFile, deleteFile } from "../services/uploadAttachments.js";
 import cloudinary from "../config/couldinary.config.js";
@@ -145,13 +145,43 @@ const createDefect = asyncHandler(async (req, res) => {
 const getAllUserCreatedDefect = asyncHandler(async (req, res) => {
   const { _id: id } = req.user;
 
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 4;
+  const startIndex = (page - 1) * limit;
+  const lastIndex = page * limit;
+  const totalRecords = await Defect.countDocuments({ createdBy: id });
+  const totalPages = Math.ceil(totalRecords / limit);
+
+  if (totalRecords > 0 && page > totalPages)
+    throw new CustomError("Page doesn't exist", 404);
+
   if (!id) throw new CustomError("Please login again", 402);
   const defect = await Defect.find(
     { createdBy: id },
     "userDefectId title assignee status createdAt"
   )
     .populate("assignee", "name email")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip(startIndex)
+    .limit(limit);
+
+  const pages = {
+    totalPages,
+    totalRecords,
+    page,
+    limit,
+  };
+
+  if (lastIndex < totalRecords) {
+    pages.next = {
+      page: page + 1,
+    };
+  }
+  if (startIndex > 0) {
+    pages.prev = {
+      page: page - 1,
+    };
+  }
 
   if (defect.length === 0) {
     return res.status(200).json({
@@ -161,7 +191,62 @@ const getAllUserCreatedDefect = asyncHandler(async (req, res) => {
   }
   return res.status(200).json({
     success: true,
+    message: "User created defects are fetched successfully",
     defect,
+    pages,
+  });
+});
+
+const getAllAssignedToUser = asyncHandler(async (req, res) => {
+  const { _id: id } = req.user;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 4;
+  const startIndex = (page - 1) * limit;
+  const lastIndex = page * limit;
+  const totalRecords = await Defect.countDocuments({ assignee: id });
+  const totalPages = Math.ceil(totalRecords / limit);
+
+  if (totalRecords > 0 && page > totalPages)
+    throw new CustomError("Page doesn't exist", 404);
+
+  const defect = await Defect.find(
+    { assignee: id },
+    "userDefectId title assignee status createdAt createdBy"
+  )
+    .populate("assignee createdBy", "name email")
+    .sort({ createdAt: -1 })
+    .skip(startIndex)
+    .limit(limit);
+
+  const pages = {
+    totalPages,
+    totalRecords,
+    page,
+    limit,
+  };
+
+  if (lastIndex < totalRecords) {
+    pages.next = {
+      page: page + 1,
+    };
+  }
+  if (startIndex > 0) {
+    pages.prev = {
+      page: page - 1,
+    };
+  }
+
+  if (defect.length === 0) {
+    return res.status(200).json({
+      success: true,
+      message: "No defects are assigned to user",
+    });
+  }
+  return res.status(200).json({
+    success: true,
+    message: "Defects assigned to user are fetched successfully",
+    defect,
+    pages,
   });
 });
 
@@ -230,15 +315,44 @@ const updateDefect = asyncHandler(async (req, res) => {
   const updatedDefect = Object.assign(defect, newFields);
 
   // // Save the updated document to the database
-  const updatedResult = await updatedDefect.save();
+  const updatedResult = await updatedDefect.save().then(async () => {
+    const updatedDefect = await Defect.findById(defectId).populate(
+      "assignee",
+      "name email"
+    );
+    if (!updateDefect)
+      throw new CustomError("Error in updating the defect", 500);
+    return res.json({
+      UpdatedFields: newFields,
+      success: true,
+      message: `Values of ${Object.keys(
+        newFields
+      ).toString()} are updated successfully in defect`,
+      defect: updatedDefect,
+    });
+  });
+});
 
-  return res.json({
-    UpdatedFields: newFields,
+const assigneeAutocomplete = asyncHandler(async (req, res) => {
+  const { key } = req.params;
+
+  if (!key) throw new CustomError("Please enter an value to search", 401);
+
+  const userName = await User.find(
+    {
+      $or: [
+        { email: { $regex: key, $options: "i" } },
+        { name: { $regex: key, $options: "i" } },
+        { project: { $regex: key, $options: "i" } },
+      ],
+    },
+    "_id email name"
+  ).limit(5);
+
+  return res.status(201).json({
     success: true,
-    message: `Values of ${Object.keys(
-      newFields
-    ).toString()} are updated successfully in defect`,
-    updatedResult,
+    message: "Username results fetched successfully",
+    userName,
   });
 });
 
@@ -529,6 +643,8 @@ export {
   updateAttachment,
   deleteAttachment,
   searchDefect,
+  getAllAssignedToUser,
+  assigneeAutocomplete,
 };
 
 // app.get('/api/myData', async (req, res) => {

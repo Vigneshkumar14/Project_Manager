@@ -140,7 +140,34 @@ export const createNewDefect = async (values) => {
 
     return result.data;
   } catch (err) {
-    console.log("first", err);
+    throw Error(err.response.data.message);
+  }
+};
+
+export const assignedToYou = async (page) => {
+  try {
+    const result = await axios.get(
+      `${process.env.REACT_APP_BASE_URL}/api/defect/userassignee?page=${page}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return result.data;
+  } catch (err) {
+    throw Error(err.response.data.message);
+  }
+};
+
+export const createdByYou = async (page) => {
+  try {
+    const result = await axios.get(
+      `${process.env.REACT_APP_BASE_URL}/api/defect/user?page=${page}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return result.data;
+  } catch (err) {
     throw Error(err.response.data.message);
   }
 };

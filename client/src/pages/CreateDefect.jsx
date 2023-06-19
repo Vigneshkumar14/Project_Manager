@@ -1,13 +1,13 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Spinner } from "../components/Loading.spinner";
-import { CreateDefect_commponent } from "../components/CreateDefect.commponent";
+import { CreateDefectCommponent } from "../components/CreateDefect.commponent";
 
 export const CreateDefect = () => {
-  const dispatch = useDispatch();
-  const { isLoading, defectDetails, error } = useSelector(
-    (state) => state.defect
-  );
+  const { isLoading, error } = useSelector((state) => state.defect);
+
+  document.title = `Create new defect - Orchestr8`;
+
   return isLoading ? (
     <Spinner />
   ) : error ? (
@@ -18,6 +18,6 @@ export const CreateDefect = () => {
       </div>
     </>
   ) : (
-    <CreateDefect_commponent />
+    <CreateDefectCommponent />
   );
 };

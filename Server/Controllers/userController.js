@@ -50,6 +50,7 @@ const createUser = asyncHandler(async (req, res) => {
     success: true,
     token,
     user,
+    expiry: cookieOptions.expires,
   });
 });
 
@@ -98,6 +99,7 @@ const loginUser = asyncHandler(async (req, res) => {
     message: "User authenticated",
     user,
     token,
+    expiry: cookieOptions.expires,
   });
 });
 

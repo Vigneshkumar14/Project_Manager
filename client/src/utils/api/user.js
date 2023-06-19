@@ -17,6 +17,7 @@ export const getUser = async (user) => {
       message: result.data.message,
       name: result.data.user.name,
       avatar: result.data.user.avatar,
+      expiry: result.data.expiry,
     };
 
     localStorage.setItem("user", JSON.stringify(data));
