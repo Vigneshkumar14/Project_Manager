@@ -21,7 +21,10 @@ export const isLoggedIn = asyncHandler(async (req, _res, next) => {
         "Something went wrong, Please try logging in again",
         401
       );
-    req.user = await User.findById(decodeJwtPayload.id, "email role");
+    req.user = await User.findById(
+      decodeJwtPayload.id,
+      "email role name avatar"
+    );
 
     // console.log(req.user._id.toString());
     next();

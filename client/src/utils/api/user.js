@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useDispatch } from "react-redux";
 
 export const getUser = async (user) => {
   const result = await axios.post(
@@ -8,10 +9,9 @@ export const getUser = async (user) => {
       withCredentials: true,
     }
   );
-  let data = {};
-  console.log(result.data);
+
   if (result.data.success) {
-    data = {
+    const data = {
       email: result.data.user.email,
       id: result.data.user._id,
       message: result.data.message,
@@ -20,17 +20,54 @@ export const getUser = async (user) => {
       expiry: result.data.expiry,
     };
 
-    localStorage.setItem("user", JSON.stringify(data));
+    return data;
   }
-  return data;
+};
+
+export const signUp = async (user) => {
+  try {
+    const result = await axios.post(
+      `${process.env.REACT_APP_BASE_URL}/api/create`,
+      user,
+      { withCredentials: true }
+    );
+
+    if (result.data.success) {
+      const data = {
+        email: result.data.user.email,
+        id: result.data.user._id,
+        message: result.data.message,
+        name: result.data.user.name,
+        avatar: result.data.user.avatar,
+        expiry: result.data.expiry,
+      };
+
+      return data;
+    }
+  } catch (err) {
+    throw Error(err.response.data.message);
+  }
 };
 
 export const signOut = async () => {
-  localStorage.removeItem("user");
   const result = await axios.get(
     `${process.env.REACT_APP_BASE_URL}/api/logout`,
     { withCredentials: true }
   );
 
   if (result.data) return result.data;
+};
+
+export const authCheck = async () => {
+  try {
+    const result = await axios.get(
+      `${process.env.REACT_APP_BASE_URL}/api/checkauth`,
+      { withCredentials: true }
+    );
+    if (result.data.success) {
+      return result.data;
+    }
+  } catch (err) {
+    throw new Error(err.response.data.message);
+  }
 };

@@ -100,15 +100,15 @@ export const Comments = ({ id }) => {
                 <div className="flex flex-row gap-x-4 my-2">
                   <Avatar
                     img={
-                      c?.userId.avatar
-                        ? c?.userId.avatar
+                      c?.userId?.avatar
+                        ? c?.userId?.avatar
                         : "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
                     }
                     rounded={true}
                   />
                   <div className="">
                     <h1 className="semi-bold text-lg"> {c?.userId?.name} </h1>
-                    <h2 className="font-thin text-sm ">{c.userId.email}</h2>
+                    <h2 className="font-thin text-sm ">{c?.userId?.email}</h2>
                   </div>
                 </div>
                 <div className="flex flex-col gap-y-2 place-content-end items-end ">

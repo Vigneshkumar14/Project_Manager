@@ -22,7 +22,7 @@ const createUser = asyncHandler(async (req, res) => {
 
   //   Check if email and password is blank
   if (!email || !password || !name) {
-    throw new CustomError("Email or Password should not br blank", 400);
+    throw new CustomError("Email or Password should not be blank", 400);
   }
 
   // Check if user already exist in database
@@ -48,6 +48,7 @@ const createUser = asyncHandler(async (req, res) => {
 
   return res.status(201).json({
     success: true,
+    message: "User created",
     token,
     user,
     expiry: cookieOptions.expires,
@@ -260,6 +261,25 @@ const resetPassword = asyncHandler(async (req, res) => {
   }
 });
 
+/******************************************************
+ * @CHECKAUTH
+ * @REQUEST_TYPE GET
+ * @route http://localhost:8000/api/checkauth
+ * @description checks the user given token is valid or not
+ * @parameters none
+ * @returns User Object
+ ******************************************************/
+
+const checkAuth = (req, res) => {
+  const user = req.user;
+  if (user) {
+    return res.status(201).json({
+      success: true,
+      user,
+    });
+  }
+};
+
 export {
   createUser,
   loginUser,
@@ -267,4 +287,5 @@ export {
   logout,
   forgotPassword,
   resetPassword,
+  checkAuth,
 };

@@ -5,6 +5,7 @@ import JoditEditor from "jodit-react";
 import { useDispatch } from "react-redux";
 import { createDefect } from "../store/defect/defect.reducer";
 import { Dropzone } from "./Dropzone";
+import Autocomplete from "./Autocomplete";
 
 import { useNavigate } from "react-router-dom";
 
@@ -19,8 +20,10 @@ export const CreateDefectCommponent = () => {
     comments: "",
     attachments: [],
   });
+  const [assignee, setAssignee] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
@@ -52,8 +55,6 @@ export const CreateDefectCommponent = () => {
       )
     );
 
-    // console.log(values);
-
     dispatch(createDefect(filteredObj)).then((action) => {
       if (action.payload.success) {
         console.log("first Fullfilled", action.payload);
@@ -61,6 +62,12 @@ export const CreateDefectCommponent = () => {
         navigate(`/defect/${userDefectId}`);
       }
     });
+  };
+
+  const handleAssignee = (userId, email) => {
+    if (userId) setValues({ ...values, assignee: userId });
+    if (email) setAssignee(email);
+    setEditingField("");
   };
 
   return (
@@ -211,7 +218,20 @@ export const CreateDefectCommponent = () => {
               <h1 className="font-semibold ">Assignee :</h1>
             </div>
 
-            <div>
+            {assignee === "" ? (
+              <Autocomplete change={handleAssignee} />
+            ) : (
+              values.assignee &&
+              assignee && (
+                <div>
+                  <h2 className="font-semibold" onClick={() => setAssignee("")}>
+                    {assignee ? assignee : "No Assignee"}
+                  </h2>
+                </div>
+              )
+            )}
+
+            {/* <div>
               <input
                 className="bg-darkBackground"
                 type="text"
@@ -226,7 +246,7 @@ export const CreateDefectCommponent = () => {
               >
                 <AiOutlineCheck />
               </button>
-            </div>
+            </div> */}
           </div>
           <div className="flex flex-row gap-4 pl-2 justify-start md:justify-evenly md:p-5 md:w-full">
             <div>

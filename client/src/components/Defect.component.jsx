@@ -132,7 +132,18 @@ export const Defect = () => {
   //   setValues({ ...values, name: name, value: value });
   // };
 
-  const handleAssignee = () => {
+  const handleAssignee = (userId) => {
+    if (userId) {
+      dispatch(
+        updateExistingDefect({
+          defectId: data._id,
+          updates: {
+            assignee: userId,
+          },
+          field: "assignee",
+        })
+      );
+    }
     stopEditing();
   };
 
@@ -198,7 +209,7 @@ export const Defect = () => {
 
         {/* People Container */}
         <div className="md:w-2/6 mt-5 md:mt-0 bg-darkSurface space-y-3 pb-3 px-2">
-          <h1 className="px-5 pt-5 font-bold text-lg">People</h1>
+          <h1 className="md:px-5 pt-5 font-bold text-lg">People</h1>
 
           <div className="flex flex-row gap-4 justify-start md:justify-evenly md:p-5 md:w-full">
             {/* <div className="flex > */}
@@ -211,17 +222,19 @@ export const Defect = () => {
             ) : (
               <div>
                 <Tooltip
-                  content={data?.assignee?.email}
+                  content={
+                    data?.assignee?.email
+                      ? data?.assignee?.email
+                      : "No Assignee"
+                  }
                   placement="bottom"
                   style="light"
                 >
                   <h2
                     className="font-semibold"
-                    onClick={() =>
-                      startEditing("assignee", data.assignee.email)
-                    }
+                    onClick={() => setEditingField("assignee")}
                   >
-                    {data?.assignee?.name}
+                    {data?.assignee ? data?.assignee?.name : "No Assignee"}
                   </h2>
                 </Tooltip>
               </div>

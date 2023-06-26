@@ -2,19 +2,12 @@ import React, { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineCheck, AiOutlineClose } from "react-icons/ai";
 import { Dropdown } from "flowbite-react";
-import { useDispatch, useSelector } from "react-redux";
-import { updateExistingDefect } from "../store/defect/defect.reducer";
 
 const Autocomplete = ({ change }) => {
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [userId, setUserId] = useState("");
   const [abortController, setAbortController] = useState(null);
-
-  const dispatch = useDispatch();
-  const defectId = useSelector(
-    (state) => state.defect.defectDetails.defect._id
-  );
 
   const handleInputChange = async (e) => {
     const newSearchText = e.target.value;
@@ -53,19 +46,9 @@ const Autocomplete = ({ change }) => {
     }
   };
   const handleSave = () => {
-    console.log(defectId, userId);
-    if (userId) {
-      dispatch(
-        updateExistingDefect({
-          defectId: defectId,
-          updates: {
-            assignee: userId,
-          },
-          field: "assignee",
-        })
-      );
+    if (userId && searchText) {
+      change(userId, searchText);
     }
-    change();
     setSuggestions([]);
     setSearchText("");
     setUserId("");
@@ -123,8 +106,8 @@ const Autocomplete = ({ change }) => {
 
 export default Autocomplete;
 
-{
-  /* <div className="flex flex-row ">
+// {
+/* <div className="flex flex-row ">
                 <input
                   className="bg-darkBackground"
                   type="text"
@@ -140,4 +123,4 @@ export default Autocomplete;
                   <AiOutlineCheck className="text-center" />
                 </button>
               </div> */
-}
+// }
