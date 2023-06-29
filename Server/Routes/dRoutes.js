@@ -8,6 +8,7 @@ import {
   deleteComment,
   deleteFileDefect,
   getAllAssignedToUser,
+  getAllDefects,
   getAllUserCreatedDefect,
   getDefect,
   searchDefect,
@@ -18,6 +19,7 @@ import { isLoggedIn } from "../middlewares/Auth.middleware.js";
 
 router.post("/create", isLoggedIn, createDefect);
 router.get("/user", isLoggedIn, getAllUserCreatedDefect);
+router.get("/all", isLoggedIn, getAllDefects);
 router.get("/userassignee", isLoggedIn, getAllAssignedToUser);
 router.get("/:userDefectId", isLoggedIn, getDefect);
 router.post("/delete", isLoggedIn, deleteFileDefect);

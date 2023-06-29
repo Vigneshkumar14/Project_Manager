@@ -8,3 +8,8 @@ body {
     overflow-x: hidden;
     overflow-y: scroll;
   }
+
+  .toast-message {
+    background-color:#262626 !important;
+  color: rgb(176, 176, 176) !important;
+}

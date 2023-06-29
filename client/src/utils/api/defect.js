@@ -171,3 +171,17 @@ export const createdByYou = async (page) => {
     throw Error(err.response.data.message);
   }
 };
+
+export const allDefects = async (page, limit) => {
+  try {
+    const result = await axios.get(
+      `${process.env.REACT_APP_BASE_URL}/api/defect/all?limit=${limit}&page=${page}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return result.data;
+  } catch (err) {
+    throw Error(err.response.data.message);
+  }
+};

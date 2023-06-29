@@ -5,6 +5,8 @@ import { NavLink, Link, Outlet, useNavigate } from "react-router-dom";
 import { logoutUser, reset } from "../store/user/user.reducer";
 import { Spinner } from "./Loading.spinner";
 import SearchBar from "./Search";
+import { VscDiffAdded } from "react-icons/vsc";
+import { TiSortAlphabetically } from "react-icons/ti";
 
 export const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -82,13 +84,10 @@ export const Header = () => {
                 </span>
               </Dropdown.Header>
               <Dropdown.Item className="!text-gray-300 hover:bg-slate-700">
-                Dashboard
+                <Link to="/defect/dashboard">Dashboard</Link>
               </Dropdown.Item>
               <Dropdown.Item className="!text-gray-300 hover:bg-slate-700">
-                Settings
-              </Dropdown.Item>
-              <Dropdown.Item className="!text-gray-300 hover:bg-slate-700">
-                Earnings
+                <Link to="/user/profile">Profile</Link>
               </Dropdown.Item>
               <Dropdown.Divider />
               <Dropdown.Item
@@ -112,21 +111,21 @@ export const Header = () => {
           </NavLink>
 
           <NavLink
+            to="/defect/dashboard"
+            className={({ isActive }) =>
+              isActive ? "text-blue-700" : "text-gray-300"
+            }
+          >
+            Dashboard
+          </NavLink>
+
+          <NavLink
             to="/about"
             className={({ isActive }) =>
               isActive ? "text-blue-700" : "text-gray-300"
             }
           >
             About
-          </NavLink>
-
-          <NavLink
-            to="/services"
-            className={({ isActive }) =>
-              isActive ? "text-blue-700" : "text-gray-300"
-            }
-          >
-            Services
           </NavLink>
           <div className="flex justify-center ">
             {" "}
@@ -140,21 +139,16 @@ export const Header = () => {
                   to="/defect/create"
                   className="flex flex-row items-center"
                 >
-                  <span>Create</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="bg-slate-900 ml-1 "
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 3h18v18H3zM12 8v8m-4-4h8" />
-                  </svg>
+                  <VscDiffAdded size={18} />
+
+                  <span className="ml-2">Create</span>
+                </Link>
+              </Dropdown.Item>
+              <Dropdown.Item className="!text-gray-300 bg-slate-900 hover:bg-slate-700">
+                <Link to="/defect/all" className="flex flex-row items-center ">
+                  <TiSortAlphabetically size={20} />
+
+                  <span className="ml-2">All Defects</span>
                 </Link>
               </Dropdown.Item>
             </Dropdown>

@@ -1,0 +1,18 @@
+/* Default width for large screens */
+.custom-toast-container {
+    width: 400px;
+  }
+  
+  /* Adjust width for medium screens */
+  @media (max-width: 768px) {
+    .custom-toast-container {
+      width: 300px;
+    }
+  }
+  
+  /* Adjust width for small screens */
+  @media (max-width: 480px) {
+    .custom-toast-container {
+      width: 200px;
+    }
+  }

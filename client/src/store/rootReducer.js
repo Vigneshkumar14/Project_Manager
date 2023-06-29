@@ -5,6 +5,7 @@ import { defectReducer } from "./defect/defect.reducer.js";
 import { defectHomeReducer } from "./defect/defect.home.reducer.js";
 import { persistReducer } from "redux-persist";
 import storageSession from "redux-persist/lib/storage/session";
+import { defectAllReducer } from "./defect/defect.all.reducer.js";
 const persistConfig = {
   key: "root",
   storage: storageSession,
@@ -16,4 +17,5 @@ export const rootReducer = combineReducers({
   user: persistedReducer,
   defect: defectReducer,
   defectHome: defectHomeReducer,
+  defectAll: defectAllReducer,
 });

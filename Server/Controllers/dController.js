@@ -197,6 +197,59 @@ const getAllUserCreatedDefect = asyncHandler(async (req, res) => {
   });
 });
 
+const getAllDefects = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 50;
+  console.log(page, limit);
+
+  const startIndex = (page - 1) * limit;
+  const lastIndex = page * limit;
+  const totalRecords = await Defect.countDocuments();
+  const totalPages = Math.ceil(totalRecords / limit);
+
+  if (totalRecords > 0 && page > totalPages)
+    throw new CustomError("Page doesn't exist", 404);
+
+  const defect = await Defect.find(
+    {},
+    "userDefectId title assignee status updatedAt"
+  )
+    .limit(limit)
+    .skip(startIndex)
+    .populate("assignee", "name email");
+
+  const pages = {
+    totalPages,
+    totalRecords,
+    page,
+    limit,
+  };
+
+  if (lastIndex < totalRecords) {
+    pages.next = {
+      page: page + 1,
+    };
+  }
+  if (startIndex > 0) {
+    pages.prev = {
+      page: page - 1,
+    };
+  }
+
+  if (defect.length === 0) {
+    return res.status(200).json({
+      success: true,
+      message: "No defects found",
+    });
+  }
+  return res.status(200).json({
+    success: true,
+    message: "Defects are fetched successfully",
+    defect,
+    pages,
+  });
+});
+
 const getAllAssignedToUser = asyncHandler(async (req, res) => {
   const { _id: id } = req.user;
   const page = parseInt(req.query.page) || 1;
@@ -645,6 +698,7 @@ export {
   searchDefect,
   getAllAssignedToUser,
   assigneeAutocomplete,
+  getAllDefects,
 };
 
 // app.get('/api/myData', async (req, res) => {
