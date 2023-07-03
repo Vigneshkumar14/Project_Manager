@@ -83,11 +83,23 @@ export const Header = () => {
                   Hello, {user?.name}
                 </span>
               </Dropdown.Header>
-              <Dropdown.Item className="!text-gray-300 hover:bg-slate-700">
-                <Link to="/defect/dashboard">Dashboard</Link>
+              <Dropdown.Item
+                className="!text-gray-300 hover:bg-slate-700"
+                onClick={() => {
+                  navigate("/defect/dashboard");
+                }}
+              >
+                Dashboard
+                {/* <Link to="/defect/dashboard">Dashboard</Link> */}
               </Dropdown.Item>
-              <Dropdown.Item className="!text-gray-300 hover:bg-slate-700">
-                <Link to="/user/profile">Profile</Link>
+              <Dropdown.Item
+                className="!text-gray-300 hover:bg-slate-700"
+                onClick={() => {
+                  navigate("/user/profile");
+                }}
+              >
+                Profile
+                {/* <Link to="/user/profile">Profile</Link> */}
               </Dropdown.Item>
               <Dropdown.Divider />
               <Dropdown.Item

@@ -172,6 +172,7 @@ export const defectSlice = createSlice({
     builder.addCase(fetchDefect.fulfilled, (state, action) => {
       state.isLoading = false;
       state.defectDetails = action.payload;
+      state.error = "";
     });
     builder.addCase(fetchDefect.rejected, (state, action) => {
       state.isLoading = false;

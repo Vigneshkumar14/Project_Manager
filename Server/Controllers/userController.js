@@ -44,7 +44,6 @@ const createUser = asyncHandler(async (req, res) => {
   res.cookie("token", token, cookieOptions);
 
   user.password = undefined;
-  user.role = undefined;
 
   return res.status(201).json({
     success: true,
@@ -73,7 +72,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   // Trying to find the email in the Database
   const user = await User.findOne({ email }).select(
-    "name email password avatar"
+    "name email password avatar project"
   );
   if (!user) throw new CustomError("User doen't exist", 401);
 
@@ -94,7 +93,7 @@ const loginUser = asyncHandler(async (req, res) => {
   res.status(201).cookie("token", token, cookieOptions);
 
   user.password = undefined;
-  user.role = undefined;
+
   return res.status(201).json({
     success: true,
     message: "User authenticated",
@@ -114,19 +113,19 @@ const loginUser = asyncHandler(async (req, res) => {
  ******************************************************/
 
 const changePassword = asyncHandler(async (req, res) => {
-  const { email, oldPassword, newPassword } = req.body;
+  const { currentPassword, newPassword } = req.body;
   const { userId } = req.params;
-  if (!email || !oldPassword || !newPassword)
+  if (!currentPassword || !newPassword)
     throw new CustomError("Please enter Email, Password & New Password", 401);
 
-  if (oldPassword == newPassword)
+  if (currentPassword == newPassword)
     throw new CustomError(
       "Your old password and new password cannot be same",
       401
     );
 
   const user = await User.findOne({ _id: userId }).select("+password");
-  const matchPassword = await user.comparePassword(oldPassword);
+  const matchPassword = await user.comparePassword(currentPassword);
   if (!matchPassword)
     throw new CustomError(
       "Your Current password doesn't match, Kindly try again",
@@ -137,9 +136,8 @@ const changePassword = asyncHandler(async (req, res) => {
   await user.save();
 
   user.password = undefined;
-  user.role = undefined;
 
-  return res.status(201).json({
+  return res.status(200).json({
     success: true,
     message: "Password changed successfully",
     user,
@@ -270,7 +268,7 @@ const resetPassword = asyncHandler(async (req, res) => {
  * @returns User Object
  ******************************************************/
 
-const checkAuth = (req, res) => {
+const checkAuth = asyncHandler((req, res) => {
   const user = req.user;
   if (user) {
     return res.status(201).json({
@@ -278,7 +276,35 @@ const checkAuth = (req, res) => {
       user,
     });
   }
-};
+});
+
+const editUser = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { name, avatar } = req.body;
+
+  if (!name && !avatar)
+    throw new CustomError("Both name and avatar cannot be undefined", 404);
+
+  let updateFields = {};
+
+  if (name !== undefined && name !== "") {
+    updateFields.name = name;
+  }
+
+  if (avatar !== undefined && avatar !== "") {
+    updateFields.avatar = avatar;
+  }
+
+  const user = await User.findByIdAndUpdate(_id, updateFields, {
+    new: true,
+  }).select("+name");
+
+  return res.status(200).json({
+    success: true,
+    message: "User details updated successfully",
+    user,
+  });
+});
 
 export {
   createUser,
@@ -288,4 +314,5 @@ export {
   forgotPassword,
   resetPassword,
   checkAuth,
+  editUser,
 };

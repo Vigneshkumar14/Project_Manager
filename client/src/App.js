@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./store/user/user.reducer.js";
 import { Spinner } from "./components/Loading.spinner.jsx";
 import { AllDefects } from "./pages/AllDefects.jsx";
-
+import { Profile } from "./pages/Profile.jsx";
 function App() {
   const { isLoggedIn, isLoading } = useSelector((state) => state.user);
 
@@ -50,6 +50,7 @@ function App() {
             <Route path="/defect/all" element={<AllDefects />} />
             <Route path="/defect/:defectId" element={<DefectPage />} />
             <Route path="/defect/create" element={<CreateDefect />} />
+            <Route path="/user/profile" element={<Profile />} />
           </Routes>
         </div>
       ) : isLoading ? (

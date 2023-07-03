@@ -18,6 +18,7 @@ export const getUser = async (user) => {
       name: result.data.user.name,
       avatar: result.data.user.avatar,
       expiry: result.data.expiry,
+      project: result.data.user.project,
     };
 
     return data;
@@ -40,6 +41,7 @@ export const signUp = async (user) => {
         name: result.data.user.name,
         avatar: result.data.user.avatar,
         expiry: result.data.expiry,
+        project: result.data.user.project,
       };
 
       return data;
@@ -67,6 +69,34 @@ export const authCheck = async () => {
     if (result.data.success) {
       return result.data;
     }
+  } catch (err) {
+    throw new Error(err.response.data.message);
+  }
+};
+
+export const changePassword = async (currentPassword, newPassword, userId) => {
+  try {
+    const result = await axios.put(
+      `${process.env.REACT_APP_BASE_URL}/api/changepassword/${userId}`,
+      { currentPassword, newPassword, userId },
+      { withCredentials: true }
+    );
+    if (result.data.success) {
+      return result.data;
+    }
+  } catch (err) {
+    throw new Error(err.response.data.message);
+  }
+};
+
+export const editUser = async (name, avatar) => {
+  try {
+    const result = await axios.put(
+      `${process.env.REACT_APP_BASE_URL}/api/edituser`,
+      { name, avatar },
+      { withCredentials: true }
+    );
+    if (result.data.success) return result.data;
   } catch (err) {
     throw new Error(err.response.data.message);
   }

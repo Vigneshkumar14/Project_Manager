@@ -1,5 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { authCheck, getUser, signOut, signUp } from "../../utils/api/user.js";
+import {
+  authCheck,
+  changePassword,
+  editUser,
+  getUser,
+  signOut,
+  signUp,
+} from "../../utils/api/user.js";
+import { toast } from "react-toastify";
 
 export const loginUser = createAsyncThunk(
   "user/loginUser",
@@ -22,6 +30,22 @@ export const checkAuth = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       return await authCheck();
+    } catch (err) {
+      const message =
+        (err.response && err.response.data && err.response.data.message) ||
+        err.message ||
+        err.toString();
+
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const changeUserPassword = createAsyncThunk(
+  "user/changeUserPassword",
+  async ({ currentPassword, newPassword, userId }, thunkAPI) => {
+    try {
+      return await changePassword(currentPassword, newPassword, userId);
     } catch (err) {
       const message =
         (err.response && err.response.data && err.response.data.message) ||
@@ -59,7 +83,24 @@ export const logoutUser = createAsyncThunk(
         (err.response && err.response.data && err.response.data.message) ||
         err.message ||
         err.toString();
-      console.log(err);
+
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  "user/updateUser",
+  async ({ name, avatar }, thunkAPI) => {
+    try {
+      console.log(name, avatar);
+      return await editUser(name, avatar);
+    } catch (err) {
+      const message =
+        (err.response && err.response.data && err.response.data.message) ||
+        err.message ||
+        err.toString();
+
       return thunkAPI.rejectWithValue(message);
     }
   }
@@ -141,6 +182,46 @@ export const userSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload;
       state.isLoggedIn = false;
+    });
+    builder.addCase(changeUserPassword.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(changeUserPassword.fulfilled, (state, action) => {
+      state.isLoading = false;
+      if (action.payload.success) {
+        toast.success(action.payload.message, {
+          position: toast.POSITION.BOTTOM_RIGHT,
+          className: "!bg-slate-900 !text-white",
+        });
+      }
+    });
+    builder.addCase(changeUserPassword.rejected, (state, action) => {
+      state.isLoading = false;
+
+      toast.error(action.payload, {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        className: "!bg-slate-900 !text-white",
+      });
+    });
+    builder.addCase(updateUser.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(updateUser.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.currentUser.name = action.payload.user.name;
+      state.currentUser.avatar = action.payload.user.avatar;
+      toast.success(action.payload.message, {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        className: "!bg-slate-900 !text-white",
+      });
+    });
+    builder.addCase(updateUser.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+      toast.error(action.payload, {
+        position: toast.POSITION.BOTTOM_RIGHT,
+        className: "!bg-slate-900 !text-white",
+      });
     });
   },
 });
