@@ -8,7 +8,7 @@ import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import ReactPaginate from "react-paginate";
 
 export const CreatedByYou = () => {
-  const { isLoading, details, error } = useSelector(
+  const { isLoading, details } = useSelector(
     (state) => state.defectHome.createdByYou
   );
 

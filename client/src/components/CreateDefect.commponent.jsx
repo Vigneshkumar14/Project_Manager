@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "flowbite-react";
-import { AiOutlineCheck, AiOutlinePlus } from "react-icons/ai";
+import { AiOutlinePlus } from "react-icons/ai";
 import JoditEditor from "jodit-react";
 import { useDispatch } from "react-redux";
 import { createDefect } from "../store/defect/defect.reducer";

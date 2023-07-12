@@ -72,7 +72,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   // Trying to find the email in the Database
   const user = await User.findOne({ email }).select(
-    "name email password avatar project"
+    "name email password avatar project role"
   );
   if (!user) throw new CustomError("User doen't exist", 401);
 

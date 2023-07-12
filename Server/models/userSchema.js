@@ -60,10 +60,12 @@ const userSchema = new Schema(
       type: String,
       createdAt: { type: Date, expires: "10m", default: Date.now },
     },
-    project: {
-      type: String,
-      default: "noproject",
-    },
+    projects: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Project",
+      },
+    ],
     position: {
       type: String,
     },

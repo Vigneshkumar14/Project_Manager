@@ -21,12 +21,11 @@ const Autocomplete = ({ change }) => {
       const newAbortController = new AbortController();
       setAbortController(newAbortController);
       try {
-        console.log(newSearchText);
         const result = await axios.get(
           `${process.env.REACT_APP_BASE_URL}/api/defect/search/user/${searchText}`,
           { signal: newAbortController.signal, withCredentials: true }
         );
-        console.log(newSearchText, result);
+
         if (result.data.success && result.data.userName.length > 0)
           setSuggestions(result.data.userName);
       } catch (err) {
@@ -45,7 +44,8 @@ const Autocomplete = ({ change }) => {
       setUserId(id);
     }
   };
-  const handleSave = () => {
+  const handleSave = (e) => {
+    e.preventDefault();
     if (userId && searchText) {
       change(userId, searchText);
     }
@@ -71,7 +71,13 @@ const Autocomplete = ({ change }) => {
           onChange={handleInputChange}
         />
         <button
-          onClick={() => change()}
+          onClick={(e) => {
+            e.preventDefault();
+            change();
+            setSearchText("");
+            setSuggestions([]);
+            setUserId("");
+          }}
           className="bg-inputbg rounded-lg ml-2 w-10 h-10 flex flex-row items-center justify-center text-center"
         >
           <AiOutlineClose className="text-center" />
@@ -82,24 +88,27 @@ const Autocomplete = ({ change }) => {
         >
           <AiOutlineCheck className="text-center" />
         </button>
-      </div>
-      {searchText.length > 0 && (
-        <div className="absolute bg-slate-900 mt-8 ml-24 md:ml-2 transform translate-y-2 border">
-          {suggestions.length > 0 &&
-            suggestions.map((suggestion, index) => (
-              <Dropdown.Item
-                className="!text-gray-300 flex flex-col hover:bg-slate-700 border-solid border-b"
-                key={suggestion._id}
-                onClick={() =>
-                  handleSuggestionSelect(suggestion._id, suggestion.email)
-                }
-              >
-                <h1 className="text-left"> {suggestion.name}</h1>
-                <h1 className="text-right">{suggestion.email}</h1>
-              </Dropdown.Item>
-            ))}
+        {/* mt-8 ml-24 md:ml-2 */}
+        <div className="absolute top-10 left-0 bg-slate-900 z-10 transform translate-y-2 border">
+          {searchText.length > 0 && (
+            <div>
+              {suggestions.length > 0 &&
+                suggestions.map((suggestion, index) => (
+                  <Dropdown.Item
+                    className="!text-gray-300 flex flex-col hover:bg-slate-700 border-solid border-b"
+                    key={suggestion._id}
+                    onClick={() =>
+                      handleSuggestionSelect(suggestion._id, suggestion.email)
+                    }
+                  >
+                    <h1 className="text-left"> {suggestion.name}</h1>
+                    <h1 className="text-right">{suggestion.email}</h1>
+                  </Dropdown.Item>
+                ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </Fragment>
   );
 };

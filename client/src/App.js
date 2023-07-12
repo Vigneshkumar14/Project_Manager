@@ -18,8 +18,12 @@ import { checkAuth } from "./store/user/user.reducer.js";
 import { Spinner } from "./components/Loading.spinner.jsx";
 import { AllDefects } from "./pages/AllDefects.jsx";
 import { Profile } from "./pages/Profile.jsx";
+import { AdminDashboard } from "./pages/AdminDashboard.jsx";
+import { CreateProject } from "./pages/CreateProject.jsx";
+import { ListProject } from "./pages/ListProject.jsx";
+import { Project } from "./pages/Project.jsx";
 function App() {
-  const { isLoggedIn, isLoading } = useSelector((state) => state.user);
+  const { isLoggedIn, isLoading, isAdmin } = useSelector((state) => state.user);
 
   const dispatch = useDispatch();
   const location = useLocation();
@@ -39,6 +43,25 @@ function App() {
     {
       path: "/register",
       element: isLoggedIn ? <Navigate to="/" replace /> : <Signup />,
+    },
+    {
+      path: "/admin/*",
+      element:
+        isLoggedIn && isAdmin ? (
+          <div>
+            <Header />
+            <Routes location={location}>
+              <Route path="/admindashboard" element={<AdminDashboard />} />
+              <Route path="/createproject" element={<CreateProject />} />
+              <Route path="/project" element={<ListProject />} />
+              <Route path="/project/:projectId" element={<Project />} />
+            </Routes>
+          </div>
+        ) : isLoading ? (
+          <Spinner />
+        ) : (
+          <div>Not Authourized</div>
+        ),
     },
     {
       path: "/*",

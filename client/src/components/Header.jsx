@@ -9,9 +9,10 @@ import { VscDiffAdded } from "react-icons/vsc";
 import { TiSortAlphabetically } from "react-icons/ti";
 
 export const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState({ name: "", email: "", avatar: "" });
-  const { currentUser, isLoading, error } = useSelector((state) => state.user);
+  const { currentUser, isLoading, isAdmin } = useSelector(
+    (state) => state.user
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -20,7 +21,7 @@ export const Header = () => {
       await dispatch(logoutUser());
 
       await dispatch(reset());
-      setIsLoggedIn(false);
+
       setUser({ ...user, name: "", email: "", avatar: "" });
       navigate("/logout");
     } catch (err) {
@@ -30,7 +31,6 @@ export const Header = () => {
 
   useEffect(() => {
     if (currentUser?.email) {
-      setIsLoggedIn(true);
       setUser((u) => {
         return {
           ...u,
@@ -166,8 +166,17 @@ export const Header = () => {
             </Dropdown>
           </div>
 
-          {/* <Navbar.Link href="/navbars">Pricing</Navbar.Link>
-          <Navbar.Link href="/navbars">Contact</Navbar.Link> */}
+          {isAdmin ? (
+            <NavLink
+              to="/admin/admindashboard"
+              className={({ isActive }) =>
+                isActive ? "text-blue-700" : "text-gray-300"
+              }
+            >
+              Admin Dashboard
+            </NavLink>
+          ) : null}
+          {/* <Navbar.Link href="/navbars">Contact</Navbar.Link> */}
           <div className="relative md:hidden ">
             <SearchBar />
           </div>

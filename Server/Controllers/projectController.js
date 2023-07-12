@@ -5,11 +5,10 @@ import User from "../models/userSchema.js";
 import mongoose from "mongoose";
 
 const createProject = asyncHandler(async (req, res) => {
-  const { _id: userId } = req.user;
-  const { title, description } = req.body;
+  const { title, description, owner } = req.body;
 
-  if (!userId)
-    throw new CustomError("User Id is not found please try again", 401);
+  if (!owner)
+    throw new CustomError("Owner Id is not found please try again", 401);
 
   if (!title || !description)
     throw new CustomError("Title & Description are the mandatory fields", 401);
@@ -17,7 +16,7 @@ const createProject = asyncHandler(async (req, res) => {
   const project = await Project.create({
     title,
     description,
-    owner: userId,
+    owner,
   });
   project.save();
 
@@ -36,7 +35,7 @@ const updateProject = asyncHandler(async (req, res) => {
   const project = await Project.findOne({ _id: projectId });
   if (!project) throw new CustomError("Project not found", 404);
 
-  if (!(project.owner.toString() === userId.toString()) || !(role === 1))
+  if (!(role === 1 || project.owner.toString() === userId.toString()))
     throw new CustomError("Not Autherized to edit the Project", 401);
 
   const newFields = {};
@@ -50,10 +49,15 @@ const updateProject = asyncHandler(async (req, res) => {
 
   const updatedResult = await updatedProject.save();
 
+  const uProject = await Project.findById(projectId).populate(
+    "collaborators owner",
+    "email name"
+  );
+
   return res.status(200).json({
     success: true,
     message: "Project updated successfully",
-    updatedResult,
+    project: uProject,
   });
 });
 
@@ -62,7 +66,8 @@ const addCollaborators = asyncHandler(async (req, res) => {
   const { projectId } = req.params;
   const { collaborators } = req.body;
 
-  const users = collaborators.split(",");
+  // const users = collaborators.map((user) => user.email);
+  // .split(",");
 
   if (!collaborators)
     throw new CustomError("Please enter the collabrator's IDs");
@@ -71,29 +76,34 @@ const addCollaborators = asyncHandler(async (req, res) => {
   if (!(project.owner.toString() === userId.toString() || role == 1))
     throw new CustomError("Not Autherized to edit the Project", 401);
 
-  const userExtract = await User.find({ email: { $in: users } }, "_id email");
+  // const userExtract = await User.find({ email: { $in: users } }, "_id email");
 
-  const existingEmail = userExtract.map((user) => user.email);
+  // const existingEmail = collaborators.map((user) => user.email);
 
-  const nonExistingEmails = users.filter((email) => {
-    console.log("Email ", email);
-    return !existingEmail.includes(email.trim());
-  });
+  // const nonExistingEmails = users.filter((email) => {
+  //   return !existingEmail.includes(email.trim());
+  // });
 
-  if (nonExistingEmails.length > 0)
-    throw new CustomError(
-      `These email ID's ${nonExistingEmails.toString()} doesn't exist`,
-      404
-    );
+  // if (nonExistingEmails.length > 0)
+  //   throw new CustomError(
+  //     `These email ID's ${nonExistingEmails.toString()} doesn't exist`,
+  //     404
+  //   );
 
-  const userIds = userExtract.map((user) => user._id.toString());
+  const userIds = collaborators.map((user) => user._id);
+  // .toString()
 
   const addUsers = await project.addCollaborators(userIds);
+
+  const uProject = await Project.findById(projectId).populate(
+    "collaborators owner",
+    "email name"
+  );
 
   return res.status(200).json({
     success: true,
     message: "Collaberators are added",
-    addUsers,
+    project: uProject,
   });
 });
 
@@ -118,28 +128,30 @@ const getProjectWithId = asyncHandler(async (req, res) => {
 
   const project = await Project.findOne({ _id: projectId }).populate(
     "collaborators owner",
-    "email"
+    "email name"
   );
   if (!project)
     throw new CustomError("Project ID requested doesn't exist", 404);
 
   return res.status(200).json({
     success: true,
+    message: "Project Details are fetched",
     project,
   });
 });
 
 const getAllProject = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit) || 25;
   const startIndex = (page - 1) * limit;
+  const lastIndex = page * limit;
   const totalRecords = await Project.countDocuments();
   const totalPages = Math.ceil(totalRecords / limit);
 
   if (page > totalPages) throw new CustomError("Page doesn't exist", 404);
 
   const project = await Project.find()
-    .populate("owner collaborators", "email")
+    .populate("owner collaborators", "email name")
     .skip(startIndex)
     .limit(limit);
 
@@ -150,8 +162,20 @@ const getAllProject = asyncHandler(async (req, res) => {
     limit,
   };
 
+  if (lastIndex < totalRecords) {
+    pages.next = {
+      page: page + 1,
+    };
+  }
+  if (startIndex > 0) {
+    pages.prev = {
+      page: page - 1,
+    };
+  }
+
   return res.status(200).json({
     success: true,
+
     project,
     pages,
   });

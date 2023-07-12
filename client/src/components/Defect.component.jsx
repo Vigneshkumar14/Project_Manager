@@ -160,7 +160,11 @@ export const Defect = () => {
         <div className="md:w-4/6">
           <div className="flex flex-col md:items-start space-y-4">
             <div className=" flex-shrink-0 text-center">
-              <Tooltip content="Defect Number" placement="bottom" style="light">
+              <Tooltip
+                content="Defect Number"
+                placement="bottom"
+                className="bg-gray-300 text-gray-900"
+              >
                 <h1 className=" block font-bold text-2xl md:text-3xl text-blue-400">
                   {data.userDefectId}
                 </h1>
@@ -168,7 +172,11 @@ export const Defect = () => {
             </div>
 
             <div className="  max-w-full overflow-hidden whitespace-normal break-all line-clamp-2 items-center md:w-11/12 font-semibold text-xl md:text-2xl">
-              <Tooltip content="Title" placement="bottom" style="light">
+              <Tooltip
+                content="Title"
+                placement="bottom"
+                className="bg-gray-300 text-gray-900"
+              >
                 {/* text-2xl md:text-xl lg:text-lg xl:text-base 2xl:text-md  */}
                 <h1 className="text-lg md:text-2xl">{data.title}</h1>
               </Tooltip>
@@ -195,7 +203,7 @@ export const Defect = () => {
                 <Tooltip
                   content={data.createdBy.email}
                   placement="bottom"
-                  style="light"
+                  className="bg-gray-300 text-gray-900"
                 >
                   <div className="flex flex-row ">
                     <p className="mr-5">Owner:</p>
@@ -228,7 +236,7 @@ export const Defect = () => {
                       : "No Assignee"
                   }
                   placement="bottom"
-                  style="light"
+                  className="bg-gray-300 text-gray-900"
                 >
                   <h2
                     className="font-semibold"
@@ -375,7 +383,7 @@ export const Defect = () => {
                         <Tooltip
                           content={file.uploadedBy.email}
                           placement="bottom"
-                          style="light"
+                          className="bg-gray-300 text-gray-900"
                         >
                           <h1>uploaded by: {file.uploadedBy.name}</h1>
                         </Tooltip>

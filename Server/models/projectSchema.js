@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import User from "./userSchema.js";
 
 const { Schema } = mongoose;
 
@@ -12,14 +13,13 @@ const projectSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
-  collaborators: {
-    type: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-  },
+  collaborators: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+
   created: {
     type: Date,
     default: Date.now,
@@ -27,12 +27,23 @@ const projectSchema = new Schema({
 });
 
 projectSchema.methods.addCollaborators = function (userIds) {
-  return new Promise((resolve, reject) => {
-    for (let user of userIds) {
-      this.collaborators.addToSet(user.trim());
-    }
+  return new Promise(async (resolve, reject) => {
+    try {
+      for (let user of userIds) {
+        this.collaborators.addToSet(user.trim());
+      }
 
-    resolve(this.save());
+      await this.save();
+
+      await User.updateMany(
+        { _id: { $in: userIds } },
+        { $addToSet: { projects: this._id } }
+      );
+
+      resolve(this);
+    } catch (err) {
+      reject(err);
+    }
   });
 };
 

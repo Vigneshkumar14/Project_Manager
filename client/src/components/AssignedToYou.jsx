@@ -8,7 +8,7 @@ import ReactPaginate from "react-paginate";
 import { Tooltip } from "flowbite-react";
 
 export const AssignedToYou = () => {
-  const { isLoading, details, error } = useSelector(
+  const { isLoading, details } = useSelector(
     (state) => state.defectHome.assignedToYou
   );
   const [pageCount, setPageCount] = useState(1);

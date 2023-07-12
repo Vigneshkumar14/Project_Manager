@@ -7,7 +7,7 @@ import { changeUserPassword, updateUser } from "../store/user/user.reducer";
 import { Button } from "flowbite-react";
 
 export const Profile = () => {
-  const { isLoading, currentUser, error } = useSelector((state) => state.user);
+  const { isLoading, currentUser } = useSelector((state) => state.user);
   const [password, setPassword] = useState({
     currentPassword: "",
     newPassword: "",

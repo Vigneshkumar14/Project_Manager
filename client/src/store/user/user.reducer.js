@@ -111,6 +111,7 @@ const INITIAL_STATE = {
   currentUser: "",
   error: "",
   isLoggedIn: false,
+  isAdmin: false,
 };
 
 export const userSlice = createSlice({
@@ -122,7 +123,7 @@ export const userSlice = createSlice({
       state.error = "";
     },
     resetUser(state) {
-      localStorage.removeItem("user");
+      // localStorage.removeItem("user");
       state.currentUser = "";
       state.isLoading = false;
       state.error = "";
@@ -135,12 +136,14 @@ export const userSlice = createSlice({
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.isLoading = false;
       state.currentUser = action.payload;
+      if (action.payload.role === 1) state.isAdmin = true;
       state.isLoggedIn = true;
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload;
       state.isLoggedIn = false;
+      state.isAdmin = false;
     });
     builder.addCase(signupUser.pending, (state) => {
       state.isLoading = true;
@@ -148,13 +151,14 @@ export const userSlice = createSlice({
     builder.addCase(signupUser.fulfilled, (state, action) => {
       state.isLoading = false;
       state.currentUser = action.payload;
-      state.isLoggedIn = true;
+      if (action.payload.role === 1) state.isAdmin = true;
       state.isLoggedIn = true;
     });
     builder.addCase(signupUser.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload;
       state.isLoggedIn = false;
+      state.isAdmin = false;
     });
     builder.addCase(logoutUser.pending, (state) => {
       state.isLoading = true;
@@ -169,6 +173,7 @@ export const userSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload;
       state.isLoggedIn = false;
+      state.isAdmin = false;
     });
     builder.addCase(checkAuth.pending, (state) => {
       state.isLoading = true;
@@ -176,12 +181,20 @@ export const userSlice = createSlice({
     builder.addCase(checkAuth.fulfilled, (state, action) => {
       state.isLoading = false;
       state.currentUser = action.payload.user;
+      if (action.payload.success) {
+        if (action.payload.user.role === 1) {
+          state.isAdmin = true;
+        } else {
+          state.isAdmin = false;
+        }
+      }
       state.isLoggedIn = true;
     });
     builder.addCase(checkAuth.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload;
       state.isLoggedIn = false;
+      state.isAdmin = false;
     });
     builder.addCase(changeUserPassword.pending, (state) => {
       state.isLoading = true;

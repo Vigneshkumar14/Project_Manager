@@ -1,5 +1,4 @@
 import axios from "axios";
-import { useDispatch } from "react-redux";
 
 export const getUser = async (user) => {
   const result = await axios.post(
@@ -19,6 +18,7 @@ export const getUser = async (user) => {
       avatar: result.data.user.avatar,
       expiry: result.data.expiry,
       project: result.data.user.project,
+      role: result.data.user.role,
     };
 
     return data;
@@ -42,6 +42,7 @@ export const signUp = async (user) => {
         avatar: result.data.user.avatar,
         expiry: result.data.expiry,
         project: result.data.user.project,
+        role: result.data.user.role,
       };
 
       return data;

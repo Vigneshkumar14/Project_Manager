@@ -394,7 +394,7 @@ const assigneeAutocomplete = asyncHandler(async (req, res) => {
       $or: [
         { email: { $regex: key, $options: "i" } },
         { name: { $regex: key, $options: "i" } },
-        { project: { $regex: key, $options: "i" } },
+        // { project: { $regex: key, $options: "i" } },
       ],
     },
     "_id email name"
