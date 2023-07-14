@@ -4,6 +4,8 @@ import {
   addComment,
   assigneeAutocomplete,
   createDefect,
+  dashBoard,
+  dashBoardStatusUpdate,
   deleteAttachment,
   deleteComment,
   deleteFileDefect,
@@ -21,6 +23,7 @@ router.post("/create", isLoggedIn, createDefect);
 router.get("/user", isLoggedIn, getAllUserCreatedDefect);
 router.get("/all", isLoggedIn, getAllDefects);
 router.get("/userassignee", isLoggedIn, getAllAssignedToUser);
+router.get("/dashboard", isLoggedIn, dashBoard);
 router.get("/:userDefectId", isLoggedIn, getDefect);
 router.post("/delete", isLoggedIn, deleteFileDefect);
 router.put("/update/:defectId", isLoggedIn, updateDefect);
@@ -42,4 +45,5 @@ router.delete(
 
 router.get("/search/:key", isLoggedIn, searchDefect);
 router.get("/search/user/:key", isLoggedIn, assigneeAutocomplete);
+router.put("/dashboard/update/:id", isLoggedIn, dashBoardStatusUpdate);
 export default router;

@@ -185,3 +185,30 @@ export const allDefects = async (page, limit) => {
     throw Error(err.response.data.message);
   }
 };
+
+export const getDashboard = async () => {
+  try {
+    const result = await axios.get(
+      `${process.env.REACT_APP_BASE_URL}/api/defect/dashboard`,
+      {
+        withCredentials: true,
+      }
+    );
+    return result.data;
+  } catch (err) {
+    throw Error(err.response.data.message);
+  }
+};
+
+export const updateStatus = async (id, status) => {
+  try {
+    const result = await axios.put(
+      `${process.env.REACT_APP_BASE_URL}/api/defect/dashboard/update/${id}`,
+      { status: status },
+      { withCredentials: true }
+    );
+    return result.data;
+  } catch (err) {
+    throw Error(err.response.data.message);
+  }
+};

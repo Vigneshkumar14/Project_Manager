@@ -20,6 +20,8 @@ import { AllDefects } from "./pages/AllDefects.jsx";
 import { Profile } from "./pages/Profile.jsx";
 import { AdminDashboard } from "./pages/AdminDashboard.jsx";
 import { CreateProject } from "./pages/CreateProject.jsx";
+import { Dashboard } from "./pages/Dashboard.jsx";
+
 import { ListProject } from "./pages/ListProject.jsx";
 import { Project } from "./pages/Project.jsx";
 function App() {
@@ -71,6 +73,7 @@ function App() {
           <Routes location={location}>
             <Route index element={<Home />} />
             <Route path="/defect/all" element={<AllDefects />} />
+            <Route path="/defect/dashboard" element={<Dashboard />} />
             <Route path="/defect/:defectId" element={<DefectPage />} />
             <Route path="/defect/create" element={<CreateDefect />} />
             <Route path="/user/profile" element={<Profile />} />

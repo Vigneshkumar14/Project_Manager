@@ -683,6 +683,34 @@ const searchDefect = asyncHandler(async (req, res) => {
   });
 });
 
+const dashBoard = asyncHandler(async (req, res) => {
+  const defects = await Defect.find(
+    {},
+    "userDefectId title assignee status"
+  ).populate("assignee", "name email");
+
+  return res.status(200).json({
+    success: true,
+    message: "Defect details fetched successfully",
+    defects,
+  });
+});
+
+const dashBoardStatusUpdate = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const defects = await Defect.findOneAndUpdate(
+    { _id: id },
+    { status: status },
+    { new: true }
+  );
+  if (defects)
+    return res.status(200).json({
+      success: true,
+      message: `${defects.userDefectId}'s status updated to ${defects.status}`,
+    });
+});
+
 export {
   createDefect,
   getAllUserCreatedDefect,
@@ -697,6 +725,8 @@ export {
   getAllAssignedToUser,
   assigneeAutocomplete,
   getAllDefects,
+  dashBoard,
+  dashBoardStatusUpdate,
 };
 
 // app.get('/api/myData', async (req, res) => {
