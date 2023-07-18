@@ -1,12 +1,8 @@
 import React from "react";
-import { useDispatch } from "react-redux";
+
 import { useDrag } from "react-dnd";
-import { useNavigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
 
 export const Task = ({ task }) => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
     item: task,
@@ -25,7 +21,7 @@ export const Task = ({ task }) => {
       ref={drag}
     >
       <div
-        className="flex flex-col p-1"
+        className="flex flex-col p-1 "
         onClick={() => handleClick(task.userDefectId)}
       >
         <p className="font-bold text-xl">{task.userDefectId}</p>

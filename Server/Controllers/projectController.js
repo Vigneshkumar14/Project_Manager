@@ -180,6 +180,16 @@ const getAllProject = asyncHandler(async (req, res) => {
     pages,
   });
 });
+
+const getProjectNames = asyncHandler(async (_, res) => {
+  const project = await Project.find({}, "title");
+  if (!project) throw new CustomError("No Projects found", 404);
+  return res.status(200).json({
+    success: true,
+    message: "Fetched Project titles with id",
+    project,
+  });
+});
 export {
   createProject,
   updateProject,
@@ -187,4 +197,5 @@ export {
   deleteProject,
   getProjectWithId,
   getAllProject,
+  getProjectNames,
 };

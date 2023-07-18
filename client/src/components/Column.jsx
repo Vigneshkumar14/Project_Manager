@@ -2,16 +2,12 @@ import React from "react";
 
 import { useDrop } from "react-dnd";
 import { Task } from "./Task";
-import { Dashboard } from "../pages/Dashboard";
 
 export const Column = ({ column, change }) => {
   const [{ isOver }, drop] = useDrop({
     accept: "TASK",
     drop: (item) => {
       change(item, column);
-
-      // dispatch(moveTask(item.id, column.id));
-      // updateTaskStatusAPI(item.id, column.id); // Make the API call here
     },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),

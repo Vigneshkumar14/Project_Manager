@@ -6,6 +6,7 @@ import { Spinner } from "../components/Loading.spinner";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { AiOutlineMail, AiOutlineLogin } from "react-icons/ai";
 import { BsPersonFillAdd } from "react-icons/bs";
+import { ToastContainer, toast } from "react-toastify";
 
 function LoginWrapper({ isLoading, error, isLoggedIn }) {
   const [user, setUser] = useState({ email: "", password: "" });
@@ -60,7 +61,7 @@ function LoginWrapper({ isLoading, error, isLoggedIn }) {
             </span>
           </div>
           <div className="mt-10">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={(e) => handleSubmit(e)}>
               <div className="flex flex-col mb-6">
                 <label
                   htmlFor="email"
@@ -83,6 +84,9 @@ function LoginWrapper({ isLoading, error, isLoggedIn }) {
                     onChange={(e) =>
                       setUser({ ...user, email: e.target.value })
                     }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSubmit(e);
+                    }}
                     autoComplete="email"
                   />
                 </div>
@@ -108,6 +112,9 @@ function LoginWrapper({ isLoading, error, isLoggedIn }) {
                     className="text-sm sm:text-base bg-gray-700 placeholder-gray-300 pl-10 pr-4 rounded-lg border border-gray-400 w-full py-2 focus:outline-none focus:border-blue-400"
                     placeholder="Password"
                     value={user.password}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSubmit(e);
+                    }}
                     onChange={(e) =>
                       setUser({ ...user, password: e.target.value })
                     }
@@ -118,9 +125,21 @@ function LoginWrapper({ isLoading, error, isLoggedIn }) {
 
               <div className="flex items-center mb-6 -mt-4">
                 <div className="flex ml-auto">
-                  <button className="inline-flex text-xs sm:text-sm text-blue-500 hover:text-blue-700">
+                  <h2
+                    className="inline-flex text-xs sm:text-sm text-blue-500 hover:text-blue-700"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toast.warning(
+                        "Forget password feature is currently disabled. Contact admin to reset the password",
+                        {
+                          position: toast.POSITION.BOTTOM_RIGHT,
+                          className: "!bg-slate-900 !text-white",
+                        }
+                      );
+                    }}
+                  >
                     Forgot Your Password?
-                  </button>
+                  </h2>
                 </div>
               </div>
               {errorMessage ? (
@@ -153,6 +172,7 @@ function LoginWrapper({ isLoading, error, isLoggedIn }) {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

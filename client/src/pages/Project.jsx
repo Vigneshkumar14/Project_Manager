@@ -15,7 +15,7 @@ export const Project = () => {
   const { isLoading, projectDetails } = useSelector((state) => state.admin);
 
   const [edit, setEdit] = useState(false);
-  const [owner, setOwner] = useState(false);
+  // const [owner, setOwner] = useState(false);
 
   const [editProject, setEditProject] = useState({
     title: "",
@@ -26,29 +26,29 @@ export const Project = () => {
 
   const dispatch = useDispatch();
 
-  const handleAssignee = async (userId, email) => {
-    if (
-      !userId &&
-      !email &&
-      editProject.owner._id === "" &&
-      editProject.owner.email === ""
-    )
-      setOwner(false);
+  const handleAssignee = (userId, email) => {
+    // if (
+    //   !userId &&
+    //   !email &&
+    //   editProject.owner._id === "" &&
+    //   editProject.owner.email === ""
+    // )
+    //   setOwner(false);
 
-    if (
-      !userId &&
-      !email &&
-      editProject.owner._id !== "" &&
-      editProject.owner.email !== ""
-    )
-      setOwner(true);
+    // if (
+    //   !userId &&
+    //   !email &&
+    //   editProject.owner._id !== "" &&
+    //   editProject.owner.email !== ""
+    // )
+    //   setOwner(true);
 
     if (userId && email) {
-      await setEditProject({
+      setEditProject({
         ...editProject,
         owner: { _id: userId, email: email },
       });
-      setOwner(true);
+      // setOwner(true);
     }
   };
 
@@ -88,7 +88,6 @@ export const Project = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Project", editProject, "Collabs", editCollaborators);
 
     let proj = {
       _id: projectDetails._id,
@@ -157,9 +156,7 @@ export const Project = () => {
 
               <label>Owner:</label>
 
-              <h1 className="font-bold text-lg" onClick={() => setOwner(false)}>
-                {editProject.owner?.email}
-              </h1>
+              <h1 className="font-bold text-lg">{editProject.owner?.email}</h1>
 
               <Autocomplete change={handleAssignee} />
 
@@ -209,7 +206,6 @@ export const Project = () => {
         className="flex justify-end w-full px-4"
         onClick={() => {
           setEdit(true);
-          console.log(editProject, editCollaborators);
         }}
       >
         <AiFillEdit size={22} />

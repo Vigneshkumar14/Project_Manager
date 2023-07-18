@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "flowbite-react";
 import { AiOutlinePlus } from "react-icons/ai";
 import JoditEditor from "jodit-react";
@@ -8,6 +8,8 @@ import { Dropzone } from "./Dropzone";
 import Autocomplete from "./Autocomplete";
 
 import { useNavigate } from "react-router-dom";
+import { fetchProject } from "../utils/api/defect";
+import { ToastContainer, toast } from "react-toastify";
 
 export const CreateDefectCommponent = () => {
   const [editingField, setEditingField] = useState("");
@@ -17,12 +19,35 @@ export const CreateDefectCommponent = () => {
     assignee: "",
     status: "",
     prioitiy: "",
+    project: "",
     comments: "",
     attachments: [],
   });
   const [assignee, setAssignee] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const result = await fetchProject();
+        if (result.success) setProjects(result.project);
+      } catch (err) {
+        const message =
+          (err.response && err.response.data && err.response.data.message) ||
+          err.message ||
+          err.toString();
+        toast.error(message, {
+          position: toast.POSITION.BOTTOM_RIGHT,
+          className: "!bg-slate-900 !text-white",
+        });
+      }
+    };
+
+    fetchProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -35,6 +60,8 @@ export const CreateDefectCommponent = () => {
     const selectedValue = options[selectedIndex].value;
 
     setValues({ ...values, [name]: selectedValue });
+
+    console.log(selectedValue, name);
   };
 
   const handleUploadFiles = (selectedFiles) => {
@@ -255,7 +282,7 @@ export const CreateDefectCommponent = () => {
 
             <div>
               <select
-                className="bg-darkBackground"
+                className="bg-darkBackground caret-slate-900"
                 name="status"
                 onChange={handleSelectChange}
               >
@@ -276,13 +303,33 @@ export const CreateDefectCommponent = () => {
 
             <div>
               <select
-                className="bg-darkBackground"
+                className="bg-darkBackground caret-slate-900"
                 name="prioitiy"
                 onChange={handleSelectChange}
               >
                 <option value="low"> Low </option>
                 <option value="medium"> Medium</option>
                 <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-row gap-4 pl-2 justify-start md:justify-evenly md:p-5 md:w-full">
+            <div>
+              <h1 className="font-semibold ">Project :</h1>
+            </div>
+
+            <div>
+              <select
+                className="bg-darkBackground max-h-40 overflow-y-scroll caret-slate-900"
+                name="project"
+                onChange={handleSelectChange}
+              >
+                {projects.length > 0 &&
+                  projects.map((project) => (
+                    <option key={project._id} value={project._id}>
+                      {project.title}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>
@@ -296,6 +343,7 @@ export const CreateDefectCommponent = () => {
           Create
         </Button>
       </div>
+      <ToastContainer />
     </div>
   );
 };

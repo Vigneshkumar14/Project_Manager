@@ -367,10 +367,9 @@ const updateDefect = asyncHandler(async (req, res) => {
 
   // // Save the updated document to the database
   const updatedResult = await updatedDefect.save().then(async () => {
-    const updatedDefect = await Defect.findById(defectId).populate(
-      "assignee",
-      "name email"
-    );
+    const updatedDefect = await Defect.findById(defectId)
+      .populate("assignee", "name email")
+      .populate("project", "title");
     if (!updateDefect)
       throw new CustomError("Error in updating the defect", 500);
     return res.json({
@@ -522,7 +521,8 @@ const getDefect = asyncHandler(async (req, res) => {
 
   const defect = await Defect.findOne({ userDefectId: userDefectId })
     .populate("assignee createdBy", "name email")
-    .populate("Comments.userId attachments.uploadedBy", "name email avatar");
+    .populate("Comments.userId attachments.uploadedBy", "name email avatar")
+    .populate("project", "title");
 
   if (!defect) throw new CustomError("Defect not found", 404);
   return res.status(200).json({

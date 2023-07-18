@@ -24,6 +24,8 @@ import { Dashboard } from "./pages/Dashboard.jsx";
 
 import { ListProject } from "./pages/ListProject.jsx";
 import { Project } from "./pages/Project.jsx";
+import { About } from "./pages/About.jsx";
+import { Footer } from "./components/Footer.jsx";
 function App() {
   const { isLoggedIn, isLoading, isAdmin } = useSelector((state) => state.user);
 
@@ -45,6 +47,10 @@ function App() {
     {
       path: "/register",
       element: isLoggedIn ? <Navigate to="/" replace /> : <Signup />,
+    },
+    {
+      path: "/about",
+      element: <About />,
     },
     {
       path: "/admin/*",
@@ -69,7 +75,7 @@ function App() {
       path: "/*",
       element: isLoggedIn ? (
         <div>
-          <Header />
+          {/* <Header /> */}
           <Routes location={location}>
             <Route index element={<Home />} />
             <Route path="/defect/all" element={<AllDefects />} />
@@ -77,7 +83,9 @@ function App() {
             <Route path="/defect/:defectId" element={<DefectPage />} />
             <Route path="/defect/create" element={<CreateDefect />} />
             <Route path="/user/profile" element={<Profile />} />
+            <Route path="/user/about" element={<About />} />
           </Routes>
+          {/* <Footer /> */}
         </div>
       ) : isLoading ? (
         <Spinner />
@@ -89,6 +97,12 @@ function App() {
     { path: "*", element: <Navigate to="/" replace /> },
   ]);
 
-  return <div className=" text-gray-300 bg-darkBackground">{routing}</div>;
+  return (
+    <div className="flex flex-col min-h-screen text-gray-300 bg-darkBackground">
+      {isLoggedIn && <Header />}
+      <div className="flex-grow">{routing}</div>
+      {isLoggedIn && <Footer />}
+    </div>
+  );
 }
 export default App;

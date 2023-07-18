@@ -213,6 +213,9 @@ export const defectSlice = createSlice({
         if (key === "assignee") {
           state.defectDetails.defect.assignee = updatedAssignee;
         }
+        if (key === "project") {
+          state.defectDetails.defect.project = action.payload.defect.project;
+        }
       });
     });
     builder.addCase(updateExistingDefect.rejected, (state, action) => {

@@ -212,3 +212,15 @@ export const updateStatus = async (id, status) => {
     throw Error(err.response.data.message);
   }
 };
+
+export const fetchProject = async () => {
+  try {
+    const result = await axios.get(
+      `${process.env.REACT_APP_BASE_URL}/api/project/getnames`,
+      { withCredentials: true }
+    );
+    return result.data;
+  } catch (err) {
+    throw Error(err.response.data.message);
+  }
+};

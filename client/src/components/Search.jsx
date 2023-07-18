@@ -25,7 +25,6 @@ const SearchBar = () => {
           `${process.env.REACT_APP_BASE_URL}/api/defect/search/${newSearchText}`,
           { signal: newAbortController.signal, withCredentials: true }
         );
-        console.log(newSearchText, result);
 
         setSuggestions(result.data.searchResult);
       } catch (err) {

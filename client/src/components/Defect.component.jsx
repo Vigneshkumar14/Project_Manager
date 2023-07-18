@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "react-quill/dist/quill.snow.css";
 
 import { Button, Tooltip } from "flowbite-react";
 import {
@@ -20,6 +19,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Dropzone } from "./Dropzone";
 import Autocomplete from "./Autocomplete";
+import { fetchProject } from "../utils/api/defect";
+import { ToastContainer, toast } from "react-toastify";
 
 export const Defect = () => {
   const [editingField, setEditingField] = useState("");
@@ -29,12 +30,13 @@ export const Defect = () => {
   });
   const [uploadFiles, setUploadFiles] = useState([]);
   const [fileChangeCount, setFileChangeCount] = useState(0);
+  const [projects, setProjects] = useState([]);
   const dispatch = useDispatch();
   const { defect: data } = useSelector((state) => state.defect.defectDetails);
 
   const [textValue, setTextValue] = useState("");
 
-  let text = ["assignee", "status", "priority"];
+  let text = ["assignee", "status", "priority", "project"];
   let richText = ["description", "addComments"];
 
   const startEditing = (field, fieldValue) => {
@@ -153,7 +155,25 @@ export const Defect = () => {
 
     setValues({ ...values, name: name, value: selectedValue });
   };
-  useEffect(() => {}, [editingField, values, dispatch]);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const result = await fetchProject();
+        if (result.success) setProjects(result.project);
+      } catch (err) {
+        const message =
+          (err.response && err.response.data && err.response.data.message) ||
+          err.message ||
+          err.toString();
+        toast.error(message, {
+          position: toast.POSITION.BOTTOM_RIGHT,
+          className: "!bg-slate-900 !text-white",
+        });
+      }
+    };
+
+    fetchProjects();
+  }, [editingField, values, dispatch]);
   return (
     <div className="flex flex-col mt-5 mx-4 md:mt-20 md:ml-10 gap-y-4">
       <div className="flex  flex-col md:flex-row ">
@@ -178,7 +198,7 @@ export const Defect = () => {
                 className="bg-gray-300 text-gray-900"
               >
                 {/* text-2xl md:text-xl lg:text-lg xl:text-base 2xl:text-md  */}
-                <h1 className="text-lg md:text-2xl">{data.title}</h1>
+                <h1 className="text-lg md:text-2xl capitalize">{data.title}</h1>
               </Tooltip>
             </div>
           </div>
@@ -188,16 +208,18 @@ export const Defect = () => {
             <div className="grid gap-2 gap-x-4 grid-cols-1 md:grid-cols-2 md:grid-rows-2 mt-2 md:mt-5">
               <div className="flex flex-row ">
                 <p className="mr-5">Status:</p>
-                <p className="">{data.status}</p>
+                <p className="capitalize">{data.status}</p>
               </div>
 
               <div className="flex flex-row ">
                 <p className="mr-5">Priority :</p>
-                <p className="">{data.prioitiy}</p>
+                <p className="capitalize">{data.prioitiy}</p>
               </div>
               <div className="flex flex-row ">
                 <p className="mr-5">Project:</p>
-                <p className="">{data.project}</p>
+                <p className="capitalize">
+                  {data?.project?.title ? data?.project?.title : "No Project"}
+                </p>
               </div>
               <div className="flex flex-row ">
                 <Tooltip
@@ -207,7 +229,7 @@ export const Defect = () => {
                 >
                   <div className="flex flex-row ">
                     <p className="mr-5">Owner:</p>
-                    <p className="">{data.createdBy.name}</p>
+                    <p className="capitalize">{data.createdBy.name}</p>
                   </div>
                 </Tooltip>
               </div>
@@ -239,7 +261,7 @@ export const Defect = () => {
                   className="bg-gray-300 text-gray-900"
                 >
                   <h2
-                    className="font-semibold"
+                    className="font-semibold capitalize"
                     onClick={() => setEditingField("assignee")}
                   >
                     {data?.assignee ? data?.assignee?.name : "No Assignee"}
@@ -275,7 +297,7 @@ export const Defect = () => {
             ) : (
               <div>
                 <h2
-                  className="font-semibold"
+                  className="font-semibold capitalize"
                   onClick={() => startEditing("status", data.status)}
                 >
                   {data?.status}
@@ -306,10 +328,45 @@ export const Defect = () => {
             ) : (
               <div>
                 <h2
-                  className="font-semibold"
+                  className="font-semibold capitalize"
                   onClick={() => startEditing("prioitiy", data.prioitiy)}
                 >
                   {data?.prioitiy}
+                </h2>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-row gap-4 justify-start md:justify-evenly md:p-5 md:w-full">
+            <div>
+              <h1 className="font-semibold ">Project :</h1>
+            </div>
+            {editingField === "project" ? (
+              <div>
+                <select
+                  className="bg-darkBackground"
+                  name="project"
+                  // value={values.value}
+                  onChange={handleSelectChange}
+                >
+                  {projects.length > 0 &&
+                    projects.map((project) => (
+                      <option key={project._id} value={project._id}>
+                        {project.title}
+                      </option>
+                    ))}
+                </select>
+                <button onClick={handleSave} className="rounded-lg ml-2">
+                  <AiOutlineCheck />
+                </button>
+              </div>
+            ) : (
+              <div>
+                <h2
+                  className="font-semibold"
+                  onClick={() => startEditing("project", data?.project?._id)}
+                >
+                  {data?.project?.title ? data?.project?.title : "No Project"}
                 </h2>
               </div>
             )}
@@ -461,6 +518,7 @@ export const Defect = () => {
           </div>
         )}
       </div>
+      <ToastContainer />
     </div>
   );
 };

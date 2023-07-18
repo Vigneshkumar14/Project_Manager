@@ -132,7 +132,7 @@ export const Header = () => {
           </NavLink>
 
           <NavLink
-            to="/about"
+            to="/user/about"
             className={({ isActive }) =>
               isActive ? "text-blue-700" : "text-gray-300"
             }

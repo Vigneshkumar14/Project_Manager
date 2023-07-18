@@ -4,6 +4,12 @@ import { Column } from "../components/Column";
 import { getDashBoardDefects } from "../store/defect/defect.all.reducer";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { TouchBackend } from "react-dnd-touch-backend";
+import {
+  MultiBackend,
+  TouchTransition,
+  MouseTransition,
+} from "react-dnd-multi-backend";
 import { Spinner } from "../components/Loading.spinner";
 import { ToastContainer, toast } from "react-toastify";
 import { updateStatus } from "../utils/api/defect";
@@ -12,6 +18,22 @@ export const Dashboard = () => {
   const { isLoading, dashboard } = useSelector((state) => state.defectAll);
   const dispatch = useDispatch();
   const [columns, setColumns] = useState(dashboard);
+
+  const HTML5toTouch = {
+    backends: [
+      {
+        backend: HTML5Backend,
+        transition: MouseTransition,
+        preview: true,
+      },
+      {
+        backend: TouchBackend,
+        options: { enableMouseEvents: true },
+        preview: true,
+        transition: TouchTransition,
+      },
+    ],
+  };
 
   useEffect(() => {
     document.title = "Dashboard - Orchestr8";
@@ -81,12 +103,12 @@ export const Dashboard = () => {
   return isLoading ? (
     <Spinner />
   ) : (
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider backend={MultiBackend} options={HTML5toTouch}>
       <h1 className="flex justify-center text-3xl font-semibold pt-5">
         Dashboard
       </h1>
 
-      <div className="flex justify-center py-8">
+      <div className="flex flex-col md:flex-row justify-center py-8 px-2 w-11/12 md:w-full ">
         {columns.map((column) => (
           <Column key={column.id} column={column} change={changeStatus} />
         ))}

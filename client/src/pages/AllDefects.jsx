@@ -191,7 +191,6 @@ export const AllDefects = () => {
       <div className="flex flex-row items-end justify-end mt-5">
         <select
           value={selectedLimit}
-          defaultValue={50}
           onChange={(e) => setSelectedLimit(e.target.value)}
           className="bg-darkBackground float-right rounded-md border-gray-200 hove:border-none"
         >

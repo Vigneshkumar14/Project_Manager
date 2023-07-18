@@ -65,7 +65,7 @@ const Autocomplete = ({ change }) => {
     <Fragment>
       <div className="flex flex-row justify-around relative">
         <input
-          className="rounded-sm  bg-slate-900 w-full"
+          className="rounded-sm  bg-slate-900 w-full caret-slate-900"
           placeholder=""
           value={searchText}
           onChange={handleInputChange}
