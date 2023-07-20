@@ -1,6 +1,4 @@
 import config from "./config/index.js";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import express from "express";
 import cookieParser from "cookie-parser";
 import { connectToDB } from "./config/database.js";
@@ -29,18 +27,6 @@ app.use(function (req, res, next) {
     "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept,application/json"
   );
   next();
-});
-
-// Convert the import.meta.url to a file path
-const __filename = fileURLToPath(import.meta.url);
-// Get the directory path of the current module
-const __dirname = dirname(__filename);
-
-app.use(express.static(join(__dirname, "build")));
-
-// PATH CONFIGURATION TO RESPOND TO A REQUEST TO STATIC ROUTE REQUEST BY SERVING index.html
-app.get("/*", function (req, res) {
-  res.sendFile(join(__dirname, "build", "index.html"));
 });
 
 app.use(express.json());
