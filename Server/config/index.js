@@ -7,6 +7,7 @@ const config = {
   SALTROUNDS: process.env.SALTROUNDS,
   SECRET: process.env.SECRET,
   EXPIRY: process.env.EXPIRY,
+  DOMAIN: process.env.DOMAIN,
   // Email config variables
   SMTP_MAIL_HOST: process.env.SMTP_MAIL_HOST,
   SMTP_MAIL_PORT: process.env.SMTP_MAIL_PORT,

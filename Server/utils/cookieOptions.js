@@ -3,7 +3,7 @@ const cookieOptions = {
   httpOnly: true,
   sameSite: "none",
   secure: true,
-  domain: process.env.DOMAIN,
+  // domain: process.env.DOMAIN,
 };
 
 export default cookieOptions;
