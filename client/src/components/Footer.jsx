@@ -5,7 +5,7 @@ import { FiAlertTriangle } from "react-icons/fi";
 
 export const Footer = () => {
   return (
-    <footer className=" bg-gray-900 text-gray-300 py-6 text-center shrink-0 ">
+    <footer className=" bg-gray-900 text-gray-300 py-6 text-center shrink-0 mt-6">
       <div className=" flex  flex-col justify-between space-y-4 md:space-y-0 items-center md:flex-row md:flex-row py-10">
         <div className="flex md:w-1/4 items-center justify-center">
           <h1 className="font-montserrat shrink-0 self-center font-extrabold text-transparent text-5xl md:text-4xl bg-clip-text bg-gradient-to-r from-slate-500 to-slate-600 bg-clip-text text-transparent">

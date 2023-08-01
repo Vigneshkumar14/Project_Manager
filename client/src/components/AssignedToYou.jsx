@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { TbZzz } from "react-icons/tb";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import ReactPaginate from "react-paginate";
-import { Tooltip } from "flowbite-react";
+import Tooltip from "./Tooltip";
 
 export const AssignedToYou = () => {
   const { isLoading, details } = useSelector(
@@ -88,13 +88,11 @@ export const AssignedToYou = () => {
                         <h2 className="mr-1">Created By :</h2>
 
                         <Tooltip
-                          content={
+                          text={
                             defect?.createdBy?.name
                               ? defect?.createdBy?.name
                               : "No Assignee"
                           }
-                          placement="bottom"
-                          trigger="hover"
                         >
                           <h2 className="text-[#434343]">
                             {defect.createdBy.email}

@@ -1,5 +1,4 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Dropdown } from "flowbite-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -63,23 +62,26 @@ const SearchBar = () => {
       {searchText.length > 0 && (
         <div>
           {suggestions.length > 0 ? (
-            <div className="absolute top-10 left-0 bg-slate-900 w-full">
+            <div className="absolute top-10 left-0 bg-slate-900 w-full px-2 py-2 rounded-md border">
               {suggestions.map((suggestion, index) => (
-                <Dropdown.Item
-                  className="!text-gray-300 hover:bg-slate-700"
+                <div
+                  className="!text-gray-300 hover:bg-slate-700 py-1 px-1 cursor-pointer rounded-lg"
                   key={suggestion._id}
                   onClick={() =>
                     handleSuggestionSelect(suggestion.userDefectId)
                   }
                 >
                   {suggestion.userDefectId}
-                </Dropdown.Item>
+                </div>
               ))}
             </div>
           ) : (
             suggestions.length === 0 && (
-              <div className="absolute top-10 left-0 bg-slate-900 w-full">
-                <Dropdown.Item> No results found</Dropdown.Item>
+              <div className="absolute top-10 left-0 bg-slate-900 w-full px-2 py-2 rounded-md border">
+                <div className="!text-gray-300 hover:bg-slate-700 py-1 px-1 cursor-pointer rounded-lg">
+                  {" "}
+                  No results found
+                </div>
               </div>
             )
           )}

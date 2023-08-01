@@ -61,7 +61,7 @@ export const CreateDefectCommponent = () => {
 
     setValues({ ...values, [name]: selectedValue });
 
-    console.log(selectedValue, name);
+    // console.log(selectedValue, name);
   };
 
   const handleUploadFiles = (selectedFiles) => {

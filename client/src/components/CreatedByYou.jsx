@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCreatedByYou } from "../store/defect/defect.home.reducer";
 import { useNavigate } from "react-router-dom";
 import { HiOutlineEmojiHappy } from "react-icons/hi";
-import { Tooltip } from "flowbite-react";
+import Tooltip from "./Tooltip";
+
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import ReactPaginate from "react-paginate";
 
@@ -89,13 +90,11 @@ export const CreatedByYou = () => {
                     </div>
                     <div className="flex flex-col capitalize w-full  items-start">
                       <Tooltip
-                        content={
+                        text={
                           defect?.assignee?.name
                             ? defect?.assignee?.name
                             : "No Assignee"
                         }
-                        placement="bottom"
-                        trigger="hover"
                       >
                         <div className="flex flex-row shrink-0 w-2/4">
                           <h2 className="mr-1 shrink-0">Assigned to :</h2>

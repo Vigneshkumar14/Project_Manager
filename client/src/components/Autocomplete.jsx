@@ -1,7 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineCheck, AiOutlineClose } from "react-icons/ai";
-import { Dropdown } from "flowbite-react";
 
 const Autocomplete = ({ change }) => {
   const [searchText, setSearchText] = useState("");
@@ -94,7 +93,7 @@ const Autocomplete = ({ change }) => {
             <div>
               {suggestions.length > 0 &&
                 suggestions.map((suggestion, index) => (
-                  <Dropdown.Item
+                  <div
                     className="!text-gray-300 flex flex-col hover:bg-slate-700 border-solid border-b"
                     key={suggestion._id}
                     onClick={() =>
@@ -103,7 +102,7 @@ const Autocomplete = ({ change }) => {
                   >
                     <h1 className="text-left"> {suggestion.name}</h1>
                     <h1 className="text-right">{suggestion.email}</h1>
-                  </Dropdown.Item>
+                  </div>
                 ))}
             </div>
           )}
@@ -114,22 +113,3 @@ const Autocomplete = ({ change }) => {
 };
 
 export default Autocomplete;
-
-// {
-/* <div className="flex flex-row ">
-                <input
-                  className="bg-darkBackground"
-                  type="text"
-                  name="assignee"
-                  value={values.value}
-                  onChange={handleInputChange}
-                  // onBlur={stopEditing}
-                />
-                <button
-                  onClick={handleSave}
-                  className="bg-inputbg rounded-lg ml-2 w-10 h-10 flex flex-row items-center justify-center text-center"
-                >
-                  <AiOutlineCheck className="text-center" />
-                </button>
-              </div> */
-// }

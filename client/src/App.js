@@ -26,6 +26,7 @@ import { ListProject } from "./pages/ListProject.jsx";
 import { Project } from "./pages/Project.jsx";
 import { About } from "./pages/About.jsx";
 import { Footer } from "./components/Footer.jsx";
+
 function App() {
   const { isLoggedIn, isLoading, isAdmin } = useSelector((state) => state.user);
 
@@ -57,7 +58,7 @@ function App() {
       element:
         isLoggedIn && isAdmin ? (
           <div>
-            <Header />
+            {/* <Header /> */}
             <Routes location={location}>
               <Route path="/admindashboard" element={<AdminDashboard />} />
               <Route path="/createproject" element={<CreateProject />} />
