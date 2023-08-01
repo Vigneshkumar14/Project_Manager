@@ -1,14 +1,18 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { Navbar, Dropdown, Avatar } from "flowbite-react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState, useEffect, Fragment } from "react";
+import { TiSortAlphabetically } from "react-icons/ti";
+import { AiOutlineClose, AiOutlineDown } from "react-icons/ai";
+import { VscDiffAdded } from "react-icons/vsc";
 import { NavLink, Link, Outlet, useNavigate } from "react-router-dom";
+import SearchBar from "./Search";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser, reset } from "../store/user/user.reducer";
 import { Spinner } from "./Loading.spinner";
-import SearchBar from "./Search";
-import { VscDiffAdded } from "react-icons/vsc";
-import { TiSortAlphabetically } from "react-icons/ti";
 
 export const Header = () => {
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [dpDown, setDpDown] = useState(false);
+  const [profileDpDown, setProfileDpDown] = useState(false);
+
   const [user, setUser] = useState({ name: "", email: "", avatar: "" });
   const { currentUser, isLoading, isAdmin } = useSelector(
     (state) => state.user
@@ -40,149 +44,330 @@ export const Header = () => {
         };
       });
     }
-  }, [currentUser, isLoading, navigate, dispatch]);
+  }, [currentUser, isLoading]);
 
+  const handleDropdownToggle = () => {
+    setDpDown(!dpDown);
+  };
   return isLoading ? (
     <Spinner />
   ) : (
     <Fragment>
-      <Navbar
-        fluid={true}
-        rounded={true}
-        className="!bg-slate-900 !text-gray-300 w-full"
-      >
-        <NavLink to="/login" className="flex items-center">
+      <div className="flex items-center justify-between py-2 bg-slate-900 text-gray-300 w-full px-3 md:px-5">
+        <Link to="/">
           <div className="w-full font-montserrat self-center font-extrabold text-transparent text-3xl md:text-4xl bg-clip-text bg-gradient-to-r from-slate-500 to-slate-600 bg-clip-text text-transparent">
             Orchestr8
           </div>
-        </NavLink>
+        </Link>
 
-        <div className="flex md:order-2 justify-center items-center">
-          <div className="hidden md:block relative mx-2 ">
-            <SearchBar />
-          </div>
-          <div className="mx-2 md:mx-4">
-            <Dropdown
-              arrowIcon={false}
-              inline={true}
-              label={
-                <Avatar
-                  alt="User settings"
-                  img={
-                    user?.avatar
-                      ? user?.avatar
-                      : "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                  }
-                />
+        <nav>
+          {/* Mobile */}
+          <section className=" flex md:hidden justify-center items-center ">
+            <div className="flex justity-center items-center space-x-2 ">
+              <div>
+                <div className="group relative w-full">
+                  <img
+                    src={user?.avatar && user?.avatar}
+                    alt="profile"
+                    className="w-10 h-10  cursor-pointer"
+                    onClick={() => setProfileDpDown(!profileDpDown)}
+                  />
+
+                  <div
+                    className={`absolute top-12 right-0 z-10 bg-slate-900 border text-gray-300 p-3 rounded-lg ${
+                      profileDpDown ? "visible" : "invisible"
+                    }`}
+                  >
+                    <div className="flex flex-col whitespace-pre  space-y-2 ">
+                      <span className="block truncate text-sm font-medium text-gray-300 ">
+                        Hello, {user?.name}
+                      </span>
+                      <hr className="w-full" />
+
+                      <NavLink
+                        className="text-gray-300 hover:bg-slate-700 p-2 rounded-md"
+                        to="/defect/dashboard"
+                      >
+                        Dashboard
+                      </NavLink>
+
+                      <NavLink
+                        to="/user/profile"
+                        className="text-gray-300 hover:bg-slate-700 p-2 rounded-md"
+                      >
+                        Profile
+                      </NavLink>
+                      <hr className="w-full" />
+                      <NavLink
+                        onClick={onLogout}
+                        className="text-gray-300 hover:bg-slate-700 p-2 rounded-md"
+                      >
+                        Logout
+                      </NavLink>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="space-y-2"
+                onClick={() => setIsNavOpen((prev) => !prev)}
+              >
+                <span className="block h-0.5 w-8  bg-gray-600"></span>
+                <span className="block h-0.5 w-8  bg-gray-600"></span>
+                <span className="block h-0.5 w-8  bg-gray-600"></span>
+              </div>
+            </div>
+
+            <div
+              className={
+                isNavOpen
+                  ? "block absolute w-full h-full top-0 left-0 bg-slate-900 z-10 flex flex-col justify-evenly items-center"
+                  : "hidden"
               }
-              className="!bg-slate-900"
             >
-              <Dropdown.Header>
-                <span className="block text-sm"></span>
-                <span className="block truncate text-sm font-medium text-gray-300">
-                  Hello, {user?.name}
-                </span>
-              </Dropdown.Header>
-              <Dropdown.Item
-                className="!text-gray-300 hover:bg-slate-700"
-                onClick={() => {
-                  navigate("/defect/dashboard");
-                }}
+              <div
+                className=" absolute top-0 right-0 px-8 py-8"
+                onClick={() => setIsNavOpen(false)} // change isNavOpen state to false to close the menu
+              >
+                <AiOutlineClose size={22} />
+              </div>
+              <ul className="flex flex-col items-center justify-between min-h-[400px]">
+                <li>
+                  <div className=" flex align-baseline relative">
+                    <SearchBar />
+                  </div>
+                </li>
+                <li>
+                  <NavLink
+                    to="/"
+                    onClick={() => setIsNavOpen(false)}
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-sky-500 underline underline-offset-4 decoration-lime-300 decoration-2"
+                        : "text-gray-300"
+                    }
+                  >
+                    Home
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/defect/dashboard"
+                    onClick={() => setIsNavOpen(false)}
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-sky-500 underline underline-offset-4  decoration-lime-300 decoration-2"
+                        : "text-gray-300"
+                    }
+                  >
+                    Dashboard
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/user/about"
+                    onClick={() => setIsNavOpen(false)}
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-sky-500 underline underline-offset-4  decoration-lime-300 decoration-2"
+                        : "text-gray-300"
+                    }
+                  >
+                    About
+                  </NavLink>
+                </li>
+
+                <li>
+                  <NavLink
+                    to="/defect/create"
+                    onClick={() => setIsNavOpen(false)}
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-sky-500 underline underline-offset-4  decoration-lime-300 decoration-2"
+                        : "text-gray-300"
+                    }
+                  >
+                    Create Defect
+                  </NavLink>
+                </li>
+
+                <li>
+                  <NavLink
+                    to="/defect/all"
+                    onClick={() => setIsNavOpen(false)}
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-sky-500 underline underline-offset-4  decoration-lime-300 decoration-2"
+                        : "text-gray-300"
+                    }
+                  >
+                    All Defects
+                  </NavLink>
+                </li>
+                <li className="whitespace-pre ">
+                  {isAdmin ? (
+                    <NavLink
+                      to="/admin/admindashboard"
+                      className={({ isActive }) =>
+                        isActive
+                          ? "text-sky-500 overline decoration-lime-300 decoration-2"
+                          : "text-gray-300"
+                      }
+                      onClick={() => setIsNavOpen(false)}
+                    >
+                      Admin Dashboard
+                    </NavLink>
+                  ) : null}
+                </li>
+              </ul>
+            </div>
+          </section>
+          {/* Desktop */}
+          <ul className=" hidden space-x-6 lg:space-x-8  md:flex text-md">
+            <li>
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-sky-500 overline decoration-lime-300 decoration-2"
+                    : "text-gray-300"
+                }
+              >
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/defect/dashboard"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-sky-500 overline decoration-lime-300 decoration-2"
+                    : "text-gray-300"
+                }
               >
                 Dashboard
-                {/* <Link to="/defect/dashboard">Dashboard</Link> */}
-              </Dropdown.Item>
-              <Dropdown.Item
-                className="!text-gray-300 hover:bg-slate-700"
-                onClick={() => {
-                  navigate("/user/profile");
-                }}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/user/about"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-sky-500 overline decoration-lime-300 decoration-2"
+                    : "text-gray-300"
+                }
               >
-                Profile
-                {/* <Link to="/user/profile">Profile</Link> */}
-              </Dropdown.Item>
-              <Dropdown.Divider />
-              <Dropdown.Item
-                onClick={onLogout}
-                className="!text-gray-300 hover:bg-slate-700"
-              >
-                Logout
-              </Dropdown.Item>
-            </Dropdown>
-          </div>
-          <Navbar.Toggle />
-        </div>
-        <Navbar.Collapse className="flex items-center justify-center text-lg  text-center">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              isActive ? "text-blue-700" : "text-gray-300"
-            }
-          >
-            Home
-          </NavLink>
+                About
+              </NavLink>
+            </li>
 
-          <NavLink
-            to="/defect/dashboard"
-            className={({ isActive }) =>
-              isActive ? "text-blue-700" : "text-gray-300"
-            }
-          >
-            Dashboard
-          </NavLink>
-
-          <NavLink
-            to="/user/about"
-            className={({ isActive }) =>
-              isActive ? "text-blue-700" : "text-gray-300"
-            }
-          >
-            About
-          </NavLink>
-          <div className="flex justify-center ">
-            {" "}
-            <Dropdown
-              label="Defect"
-              className="!bg-slate-900 items-center"
-              inline={true}
+            <div
+              className="group relative flex flex-row items-center  w-full cursor-pointer"
+              onClick={handleDropdownToggle}
             >
-              <Dropdown.Item className="!text-gray-300 bg-slate-900 hover:bg-slate-700">
-                <Link
-                  to="/defect/create"
-                  className="flex flex-row items-center"
+              Defect <AiOutlineDown size={12} className="ml-2" />
+              <div
+                className={`absolute top-10 left-0 bg-slate-900 border text-gray-300 p-3 rounded-lg ${
+                  dpDown ? "visible" : "invisible"
+                }`}
+              >
+                <div className="flex flex-col whitespace-pre  space-y-2 ">
+                  <NavLink
+                    to="/defect/create"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "flex flex-row items-center text-sky-500 hover:bg-slate-700 p-2"
+                        : "text-gray-300 items-center flex flex-row hover:bg-slate-700 p-2 "
+                    }
+                  >
+                    <VscDiffAdded size={18} />
+
+                    <span className="flex flex-row ml-2">Create</span>
+                  </NavLink>
+                  <NavLink
+                    to="/defect/all"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "flex flex-row items-center text-sky-500 hover:bg-slate-700 p-2"
+                        : "text-gray-300 items-center flex flex-row hover:bg-slate-700 p-2"
+                    }
+                  >
+                    <TiSortAlphabetically size={20} />
+
+                    <span className="flex flex-row ml-2">All Defects </span>
+                  </NavLink>
+                </div>
+              </div>
+            </div>
+
+            <li className="whitespace-pre ">
+              {isAdmin ? (
+                <NavLink
+                  to="/admin/admindashboard"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-sky-500 overline decoration-lime-300 decoration-2"
+                      : "text-gray-300"
+                  }
                 >
-                  <VscDiffAdded size={18} />
+                  Admin Dashboard
+                </NavLink>
+              ) : null}
+            </li>
+          </ul>
+        </nav>
 
-                  <span className="ml-2">Create</span>
-                </Link>
-              </Dropdown.Item>
-              <Dropdown.Item className="!text-gray-300 bg-slate-900 hover:bg-slate-700">
-                <Link to="/defect/all" className="flex flex-row items-center ">
-                  <TiSortAlphabetically size={20} />
-
-                  <span className="ml-2">All Defects</span>
-                </Link>
-              </Dropdown.Item>
-            </Dropdown>
-          </div>
-
-          {isAdmin ? (
-            <NavLink
-              to="/admin/admindashboard"
-              className={({ isActive }) =>
-                isActive ? "text-blue-700" : "text-gray-300"
-              }
-            >
-              Admin Dashboard
-            </NavLink>
-          ) : null}
-          {/* <Navbar.Link href="/navbars">Contact</Navbar.Link> */}
-          <div className="relative md:hidden ">
+        <div className="hidden md:flex md:justity-center md:items-center md:space-x-2 ">
+          <div className="hidden md:block flex align-baseline relative mx-2">
             <SearchBar />
           </div>
-        </Navbar.Collapse>
-      </Navbar>
+          <div>
+            <div
+              className="group relative w-full"
+              onClick={() => setProfileDpDown(!profileDpDown)}
+            >
+              <img
+                src={user?.avatar && user?.avatar}
+                alt="profile"
+                className="w-10 h-10  cursor-pointer"
+              />
 
+              <div
+                className={`absolute top-12 right-0 bg-slate-900 border text-gray-300 p-3 rounded-lg ${
+                  profileDpDown ? "visible" : "invisible"
+                }`}
+              >
+                <div className="flex flex-col whitespace-pre  space-y-2 ">
+                  <span className="block truncate text-sm font-medium text-gray-300 ">
+                    Hello, {user?.name}
+                  </span>
+                  <hr className="w-full" />
+                  <NavLink
+                    to="/defect/dashboard"
+                    className="text-gray-300 hover:bg-slate-700 px-2 py-1 rounded-md"
+                  >
+                    Dashboard
+                  </NavLink>
+
+                  <NavLink
+                    to="/user/profile"
+                    className="text-gray-300 hover:bg-slate-700  px-2 py-1 rounded-md"
+                  >
+                    Profile
+                  </NavLink>
+                  <hr className="w-full" />
+                  <NavLink
+                    onClick={onLogout}
+                    className="text-gray-300 hover:bg-slate-700  px-2 py-1 rounded-md"
+                  >
+                    Logout
+                  </NavLink>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <Outlet />
     </Fragment>
   );
