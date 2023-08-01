@@ -7,6 +7,7 @@ import { RiLockPasswordLine } from "react-icons/ri";
 import { AiOutlineMail, AiOutlineLogin } from "react-icons/ai";
 import { BsPersonFillAdd } from "react-icons/bs";
 import { ToastContainer, toast } from "react-toastify";
+import { FaHandPointDown } from "react-icons/fa";
 
 function LoginWrapper({ isLoading, error, isLoggedIn }) {
   const [user, setUser] = useState({ email: "", password: "" });
@@ -45,11 +46,11 @@ function LoginWrapper({ isLoading, error, isLoggedIn }) {
   return isLoading ? (
     <Spinner />
   ) : (
-    <div className="min-h-screen items-center justify-center text-gray-300 bg-darkBackground  ">
+    <div className="min-h-screen flex flex-col items-center justify-center text-gray-300 bg-darkBackground  ">
       <div className="w-full font-montserrat text-center mb-20 p-5 font-extrabold text-transparent text-3xl md:text-4xl bg-clip-text bg-gradient-to-r from-slate-500 to-slate-600 bg-clip-text text-transparent">
         Orchestr8
       </div>
-      <div className="flex flex-col items-center justify-center ">
+      <div className="flex flex-col items-center justify-center w-full ">
         <div className="flex flex-col bg-darkSurface  text-white shadow-md px-4 sm:px-6 md:px-8 lg:px-10 py-8 rounded-md w-full max-w-md">
           <div className="font-medium self-center text-center text-xl sm:text-2xl uppercase text-gray-300">
             Login To Your Account
@@ -159,7 +160,7 @@ function LoginWrapper({ isLoading, error, isLoggedIn }) {
               </div>
             </form>
           </div>
-          <div className="flex justify-center items-center mt-6">
+          <div className="flex flex-col justify-center items-center mt-6">
             <Link
               to="/register"
               className="inline-flex items-center font-bold text-blue-500 hover:text-blue-700 text-xs text-center"
@@ -169,9 +170,30 @@ function LoginWrapper({ isLoading, error, isLoggedIn }) {
               </span>
               <button className="ml-2">You don't have an account?</button>
             </Link>
+            <div className="text-center text-blue-400 hover:text-blue-700">
+              <h1>
+                To use the application without signning up, use below
+                credentials
+              </h1>
+              <h1 className="flex justify-center">
+                <FaHandPointDown />
+              </h1>
+            </div>
           </div>
         </div>
       </div>
+      <div className="flex flex-col justify-center py-3 ">
+        <h1 className="text-center">Hello, Welcome </h1>
+        <h1>To test the application use the below credentials </h1>
+        <h1>For Admin :</h1>
+        <h1>Email: admin1@test.com, Password: test</h1>
+        <h1>For User :</h1>
+        <h1>Email: test@test.com, Password: test</h1>
+        <h1 className="my-2">
+          This application is made for educational purpose only.
+        </h1>
+      </div>
+      <div></div>
       <ToastContainer />
     </div>
   );
